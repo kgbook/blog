@@ -40,7 +40,7 @@ npm run clean
 
 This repository uses GitHub Pages Actions from [`.github/workflows/pages.yml`](/home/cory/tools/coolshin.work.gd/.github/workflows/pages.yml).
 
-- Site URL: `https://coolshin.work.gd`
-- Custom domain file: `source/CNAME`
+- Site URL: `https://kgbook.github.io/blog/`
+- Pages source: GitHub Actions
 
 Push to `main` to trigger a Pages deployment after the repository is connected to GitHub Pages with `GitHub Actions` as the publishing source.
