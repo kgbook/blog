@@ -45,7 +45,7 @@
   <!-- Canonical links -->
   <link rel="canonical" href="<%- url %>">
   <% if (theme.rss){ %>
-    <link rel="alternate" href="<%- theme.rss %>" title="<%= config.title %>" type="application/atom+xml">
+    <link rel="alternate" href="<%- url_for(theme.rss) %>" title="<%= config.title %>" type="application/atom+xml">
   <% } %>
   <% if (theme.site.favicon){ %>
     <% var faviconType = theme.site.favicon.endsWith('.svg') ? 'image/svg+xml' : 'image/x-icon'; %>
