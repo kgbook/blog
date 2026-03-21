@@ -43,11 +43,11 @@ done
 ```
 Proc信息显示DCam进程回放前占用物理内存48244 kB
 
-![beforePlayback](https://raw.githubusercontent.com/kgbook/kgbook.github.io/master/img/before-playback-VmRSS.png "before-playback-VmRSS.png")
+![beforePlayback](images/before-playback-VmRSS.png "before-playback-VmRSS.png")
 
 视频回放，多次切换视频文件，DCam进程占用物理内存124844kB！
 
-![afterPlayback](https://raw.githubusercontent.com/kgbook/kgbook.github.io/master/img/after-playback-VmRSS.png "after-playback-VmRSS.png")
+![afterPlayback](images/after-playback-VmRSS.png "after-playback-VmRSS.png")
 
 即DCam 进程占用内存不断增长。
 

@@ -56,13 +56,13 @@ kang $ objdump -s a.out
 ```
 目标文件`a.out`的构成`__cstring section`部分截图：
 
-![objdump section.png](https://raw.githubusercontent.com/kgbook/kgbook.github.io/master/img/segfault-sample-objdump.png "objdump section.png")
+![objdump section.png](images/segfault-sample-objdump.png "objdump section.png")
 
 `kang $ size -x -l -m a.out`
 
 目标文件各section布局(Mac OSX环境)：
 
-![section size.png](https://raw.githubusercontent.com/kgbook/kgbook.github.io/master/img/segfault-sample-section-size.png "section size.png")
+![section size.png](images/segfault-sample-section-size.png "section size.png")
 
 
 字符串常量存储于 `__cstring section` ，该section位于 `__TEXT segment`。`__TEXT` 以可读和可执行的方式映射，即 `pcStr` 指向了一个可读的内存区域，无法进行写操作。
@@ -359,7 +359,7 @@ segfault 发生在内存地址为`0`的地方，此时`ip`指针为`0000003d24e8
 
 Mac OSX 需要安装 [addr2line](https://springrts.com/phpbb/viewtopic.php?t=26240) 工具包, `brew install binutils` 。
 
-![addr2line.png](https://raw.githubusercontent.com/kgbook/kgbook.github.io/master/img/addr2line.png "addr2line.png")
+![addr2line.png](images/addr2line.png "addr2line.png")
 
 ### 5. 清理编译告警
 
