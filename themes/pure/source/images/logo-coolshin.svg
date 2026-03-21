@@ -1,0 +1,25 @@
+<svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="24" y1="18" x2="136" y2="142" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B1220"/>
+      <stop offset="0.55" stop-color="#0A6FD8"/>
+      <stop offset="1" stop-color="#19C2C9"/>
+    </linearGradient>
+    <linearGradient id="core" x1="80" y1="44" x2="80" y2="116" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E0F2FE"/>
+      <stop offset="1" stop-color="#67E8F9"/>
+    </linearGradient>
+  </defs>
+  <rect x="10" y="10" width="140" height="140" rx="32" fill="url(#bg)"/>
+  <rect x="54" y="54" width="52" height="52" rx="10" stroke="white" stroke-width="8"/>
+  <path d="M73 70L63 80L73 90" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M87 70L97 80L87 90" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M80 61V49" stroke="url(#core)" stroke-width="6" stroke-linecap="round"/>
+  <path d="M80 111V99" stroke="url(#core)" stroke-width="6" stroke-linecap="round"/>
+  <path d="M49 80H61" stroke="url(#core)" stroke-width="6" stroke-linecap="round"/>
+  <path d="M99 80H111" stroke="url(#core)" stroke-width="6" stroke-linecap="round"/>
+  <path d="M59 59L50 50" stroke="url(#core)" stroke-width="5" stroke-linecap="round"/>
+  <path d="M101 59L110 50" stroke="url(#core)" stroke-width="5" stroke-linecap="round"/>
+  <path d="M59 101L50 110" stroke="url(#core)" stroke-width="5" stroke-linecap="round"/>
+  <path d="M101 101L110 110" stroke="url(#core)" stroke-width="5" stroke-linecap="round"/>
+</svg>
