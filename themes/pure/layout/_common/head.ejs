@@ -49,7 +49,7 @@
   <% } %>
   <% if (theme.site.favicon){ %>
     <% var faviconType = theme.site.favicon.endsWith('.svg') ? 'image/svg+xml' : 'image/x-icon'; %>
-    <link rel="icon" href="<%- theme.site.favicon %>" type="<%= faviconType %>">
+    <link rel="icon" href="<%- url_for(theme.site.favicon) %>" type="<%= faviconType %>">
   <% } %>
   <%- css('css/style') %>
   <% if (page.mathjax) { %>
