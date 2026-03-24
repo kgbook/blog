@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page.title }} | {{ config.title }}{% endblock title %}
+{% block description %}{{ page.description | default(value=config.description) }}{% endblock description %}
+
+{% block content %}
+  <article class="card article-card">
+    <header class="article-header">
+      <p class="post-meta">{{ page.date | date(format="%Y-%m-%d") }}</p>
+      <h1>{{ page.title }}</h1>
+      <div class="post-taxonomies">
+        {% for category in page.taxonomies.categories %}
+          <a href="{{ get_taxonomy_url(kind='categories', name=category) }}">{{ category }}</a>
+        {% endfor %}
+        {% for tag in page.taxonomies.tags %}
+          <a href="{{ get_taxonomy_url(kind='tags', name=tag) }}">#{{ tag }}</a>
+        {% endfor %}
+      </div>
+    </header>
+    <div class="markdown-body">
+      {{ page.content | safe }}
+    </div>
+  </article>
+{% endblock content %}

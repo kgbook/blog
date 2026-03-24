@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}{{ taxonomy.name | title }} | {{ config.title }}{% endblock title %}
+
+{% block content %}
+  {% if taxonomy.name == "categories" %}
+    {% set eyebrow = "Categories" %}
+    {% set heading = "分类" %}
+  {% elif taxonomy.name == "tags" %}
+    {% set eyebrow = "Tags" %}
+    {% set heading = "标签" %}
+  {% else %}
+    {% set eyebrow = taxonomy.name | title %}
+    {% set heading = taxonomy.name | title %}
+  {% endif %}
+  <section class="card page-header">
+    <p class="eyebrow">{{ eyebrow }}</p>
+    <h1>{{ heading }}</h1>
+  </section>
+
+  <section class="card taxonomy-grid">
+    {% for term in terms %}
+      <a class="taxonomy-chip" href="{{ term.permalink }}">
+        <span>{{ term.name }}</span>
+        <small>{{ term.pages | length }} 篇</small>
+      </a>
+    {% endfor %}
+  </section>
+{% endblock content %}

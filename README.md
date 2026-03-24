@@ -1,40 +1,45 @@
 # coolshin blog
 
-Personal Hexo blog for `coolshin`, built with the `pure` theme and deployed with GitHub Pages.
+Personal Zola blog for `coolshin`, using a local `simple-pure` theme and deployed with GitHub Pages.
 
 ## Stack
 
-- Hexo 8
-- EJS-based `pure` theme
+- Zola
+- Local theme: `themes/simple-pure`
 - GitHub Pages via GitHub Actions
 
 ## Local development
 
-Install dependencies and start the local server:
+Install `zola` first, then run:
 
 ```bash
-npm install
-npm run server
+zola serve --interface 127.0.0.1 --port 1111
 ```
 
 Build the static site into `public/`:
 
 ```bash
-npm run build
+zola build
 ```
 
-Clean generated files before a fresh build:
+Check templates and links:
 
 ```bash
-npm run clean
+zola check
+```
+
+Clean generated files:
+
+```bash
+rm -rf public
 ```
 
 ## Content structure
 
-- Posts: `source/_posts/`
-- Standalone pages: `source/about/`, `source/categories/`, `source/tags/`
-- Hexo scaffolds: `scaffolds/`
-- Theme customization: `themes/pure/`
+- Site config: `config.toml`
+- Posts: `content/blog/`
+- Standalone pages: `content/about.md`, `content/archives.md`
+- Theme templates and assets: `themes/simple-pure/`
 
 ## Deployment
 

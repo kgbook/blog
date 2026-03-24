@@ -1,0 +1,7 @@
+name = "simple-pure"
+description = "A minimal Zola theme for this blog."
+license = "MIT"
+homepage = "https://kgbook.github.io/blog"
+min_version = "0.17.0"
+demo = "https://kgbook.github.io/blog"
+author = "Codex"

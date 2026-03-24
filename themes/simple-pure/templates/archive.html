@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page.title }} | {{ config.title }}{% endblock title %}
+
+{% block content %}
+  {% set blog = get_section(path="blog/_index.md") %}
+  <section class="card page-header">
+    <p class="eyebrow">Archive</p>
+    <h1>{{ page.title }}</h1>
+  </section>
+
+  <section class="card archive-list">
+    {% for post in blog.pages %}
+      <article class="archive-item">
+        <time>{{ post.date | date(format="%Y-%m-%d") }}</time>
+        <a href="{{ post.permalink }}">{{ post.title }}</a>
+      </article>
+    {% endfor %}
+  </section>
+{% endblock content %}

@@ -1,0 +1,40 @@
+base_url = "https://kgbook.github.io/blog"
+title = "coolshin"
+description = "Just do it with AI!"
+default_language = "zh"
+theme = "simple-pure"
+generate_feeds = true
+feed_filenames = ["atom.xml"]
+compile_sass = false
+build_search_index = false
+author = "coolshin"
+
+taxonomies = [
+  { name = "tags", feed = true },
+  { name = "categories", feed = true },
+]
+
+[markdown]
+render_emoji = false
+
+[markdown.highlighting]
+theme = "github-light"
+
+[link_checker]
+internal_level = "error"
+external_level = "warn"
+
+[extra]
+subtitle = "Just do it with AI!"
+author_title = "Android & IoT Developer"
+location = "Shenzhen, China"
+github = "https://github.com/kgbook"
+avatar = "images/avatar.png"
+logo = "images/logo-coolshin.svg"
+menu = [
+  { name = "首页", path = "" },
+  { name = "归档", path = "archives" },
+  { name = "分类", path = "categories" },
+  { name = "标签", path = "tags" },
+  { name = "关于", path = "about" },
+]

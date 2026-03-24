@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page.title }} | {{ config.title }}{% endblock title %}
+
+{% block content %}
+  <article class="card article-card about-card">
+    <header class="article-header about-header">
+      <p class="eyebrow">About</p>
+      <h1>{{ page.title }}</h1>
+    </header>
+    <div class="markdown-body about-body">
+      {{ page.content | safe }}
+    </div>
+  </article>
+{% endblock content %}

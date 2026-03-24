@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}{{ config.title }}{% endblock title %}
+
+{% block content %}
+  {% set blog = get_section(path="blog/_index.md") %}
+  <section class="card hero-card">
+    <p class="eyebrow">Recent Posts</p>
+    <h1>最新文章</h1>
+  </section>
+
+  {% for page in blog.pages %}
+    {% if loop.index <= 5 %}
+      <article class="card post-card">
+        <p class="post-meta">{{ page.date | date(format="%Y-%m-%d") }}</p>
+        <h2><a href="{{ page.permalink }}">{{ page.title }}</a></h2>
+        <p>{{ page.content | striptags | truncate(length=180) }}</p>
+        <div class="post-taxonomies">
+          {% for category in page.taxonomies.categories %}
+            <a href="{{ get_taxonomy_url(kind='categories', name=category) }}">{{ category }}</a>
+          {% endfor %}
+          {% for tag in page.taxonomies.tags %}
+            <a href="{{ get_taxonomy_url(kind='tags', name=tag) }}">#{{ tag }}</a>
+          {% endfor %}
+        </div>
+      </article>
+    {% endif %}
+  {% endfor %}
+{% endblock content %}

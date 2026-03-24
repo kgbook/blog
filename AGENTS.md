@@ -1,16 +1,16 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-This repository is a Hexo blog. Write posts under `source/_posts/`, grouped by topic folders when useful (for example `source/_posts/Linux/`). Reusable post templates live in `scaffolds/`. Site-wide settings belong in [`_config.yml`](/home/cory/tools/coolshin.work.gd/_config.yml), while theme-specific configuration and templates live under `themes/pure/`. Theme layouts are in `themes/pure/layout/`, static assets in `themes/pure/source/`, and bundled data pages in `themes/pure/_source/`. Do not edit generated output such as `public/`, `db.json`, or dependencies in `node_modules/`.
+This repository is a Zola blog. Write posts under `content/blog/`, using page bundles when a post has local images. Standalone pages live directly under `content/`, and site-wide settings belong in [`config.toml`](/Users/dl/tools/blog/config.toml). Theme-specific templates and assets live under `themes/simple-pure/`, with templates in `themes/simple-pure/templates/` and static assets in `themes/simple-pure/static/`. Do not edit generated output such as `public/`.
 
 ## Build, Test, and Development Commands
-Install dependencies with `npm install`. Use `npm run server` to start the local Hexo dev server, usually at `http://localhost:4000`. Use `npm run build` to generate the static site into `public/`. Use `npm run clean` before a rebuild if stale output is suspected. `npm run deploy` is wired to Hexo deploy support, but requires deployment settings in `_config.yml` before it is usable.
+Install `zola` locally. Use `zola serve` to start the local dev server, usually at `http://127.0.0.1:1111`. Use `zola build` to generate the static site into `public/`. Use `rm -rf public` before a rebuild if stale output is suspected. Use `zola check` for template and link validation.
 
 ## Coding Style & Naming Conventions
-Write Markdown with clear front matter and concise filenames; this site currently uses Chinese titles directly in filenames, which is acceptable. Keep YAML indentation to two spaces. Preserve existing Hexo and EJS conventions in `themes/pure/`; template partials use lowercase filenames such as `archive-post.ejs`. Prefer small, targeted theme edits instead of reformatting vendor files broadly.
+Write Markdown with clear front matter and concise filenames. Keep TOML indentation consistent with the existing files. Preserve the current Zola and Tera template conventions in `themes/simple-pure/`; template filenames use lowercase names such as `base.html` and `taxonomy_single.html`. Prefer small, targeted theme edits instead of broad restyling.
 
 ## Testing Guidelines
-There is no automated test suite in the root project. Treat `npm run build` as the required verification step for every content or theme change, and use `npm run server` for manual checks of navigation, post rendering, and asset loading. When editing templates or CSS, verify at least the home page, a post page, and one archive-style page.
+There is no automated test suite in the root project. Treat `zola build` as the required verification step for every content or theme change, and use `zola serve` for manual checks of navigation, post rendering, and asset loading. When editing templates or CSS, verify at least the home page, a post page, and one archive-style page.
 
 ## Commit & Pull Request Guidelines
-The embedded `themes/pure` history uses short, conventional subjects such as `feat: ...`, `fix: ...`, and `Update README.md`; follow that style for this repository. Keep commits focused and imperative, for example `feat: add Linux memory troubleshooting post`. Pull requests should include a short summary, note any config or content paths changed, link related issues if present, and add screenshots for visible theme or layout changes.
+Follow short, conventional commit subjects such as `feat: ...` and `fix: ...`. Keep commits focused and imperative, for example `feat: migrate blog to zola`. Pull requests should include a short summary, note any config, content, or template paths changed, link related issues if present, and add screenshots for visible theme or layout changes.

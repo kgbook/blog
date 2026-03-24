@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}{{ term.name }} | {{ config.title }}{% endblock title %}
+
+{% block content %}
+  {% if taxonomy.name == "categories" %}
+    {% set eyebrow = "Categories" %}
+  {% elif taxonomy.name == "tags" %}
+    {% set eyebrow = "Tags" %}
+  {% else %}
+    {% set eyebrow = taxonomy.name | title %}
+  {% endif %}
+  <section class="card page-header">
+    <p class="eyebrow">{{ eyebrow }}</p>
+    <h1>{{ term.name }}</h1>
+  </section>
+
+  {% for page in term.pages %}
+    <article class="card post-card">
+      <p class="post-meta">{{ page.date | date(format="%Y-%m-%d") }}</p>
+      <h2><a href="{{ page.permalink }}">{{ page.title }}</a></h2>
+      <p>{{ page.content | striptags | truncate(length=180) }}</p>
+    </article>
+  {% endfor %}
+{% endblock content %}
