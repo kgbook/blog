@@ -38,3 +38,10 @@ menu = [
   { name = "标签", path = "tags" },
   { name = "关于", path = "about" },
 ]
+
+[extra.comments]
+provider = "utterances"
+repo = "kgbook/blog-comments"
+issue_term = "pathname"
+label = "comments"
+theme = "github-light"

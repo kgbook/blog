@@ -338,6 +338,11 @@ blockquote {
   border: 1px solid rgba(117, 138, 160, 0.2);
 }
 
+.comment-card h2 {
+  margin: 0 0 18px;
+  font-size: 1.15rem;
+}
+
 @media (max-width: 920px) {
   .layout {
     grid-template-columns: 1fr;
