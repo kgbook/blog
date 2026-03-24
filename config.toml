@@ -40,8 +40,15 @@ menu = [
 ]
 
 [extra.comments]
-provider = "utterances"
-repo = "kgbook/blog-comments"
-issue_term = "pathname"
-label = "comments"
-theme = "github-light"
+provider = "giscus"
+repo = "kgbook/blog"
+repo_id = "R_kgDORtG-Tg"
+category = "Announcements"
+category_id = "DIC_kwDORtG-Ts4C5Jk0"
+mapping = "pathname"
+strict = "0"
+reactions_enabled = "1"
+emit_metadata = "0"
+input_position = "bottom"
+theme = "preferred_color_scheme"
+lang = "zh-CN"

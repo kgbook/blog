@@ -22,19 +22,21 @@
     </div>
   </article>
 
-  {% if config.extra.comments and config.extra.comments.provider == "utterances" %}
+  {% if config.extra.comments and config.extra.comments.provider == "giscus" %}
     <section class="card comment-card">
       <h2>评论</h2>
-      {% if page.extra and page.extra.comment_issue_term %}
-        {% set utterances_issue_term = page.extra.comment_issue_term %}
-      {% else %}
-        {% set utterances_issue_term = config.extra.comments.issue_term %}
-      {% endif %}
-      <script src="https://utteranc.es/client.js"
-              repo="{{ config.extra.comments.repo }}"
-              issue-term="{{ utterances_issue_term }}"
-              label="{{ config.extra.comments.label }}"
-              theme="{{ config.extra.comments.theme }}"
+      <script src="https://giscus.app/client.js"
+              data-repo="{{ config.extra.comments.repo }}"
+              data-repo-id="{{ config.extra.comments.repo_id }}"
+              data-category="{{ config.extra.comments.category }}"
+              data-category-id="{{ config.extra.comments.category_id }}"
+              data-mapping="{{ config.extra.comments.mapping }}"
+              data-strict="{{ config.extra.comments.strict }}"
+              data-reactions-enabled="{{ config.extra.comments.reactions_enabled }}"
+              data-emit-metadata="{{ config.extra.comments.emit_metadata }}"
+              data-input-position="{{ config.extra.comments.input_position }}"
+              data-theme="{{ config.extra.comments.theme }}"
+              data-lang="{{ config.extra.comments.lang }}"
               crossorigin="anonymous"
               async>
       </script>
