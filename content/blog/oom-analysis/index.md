@@ -5,6 +5,8 @@ path = "2018/05/23/oom_analysis"
 [taxonomies]
 categories = ["Linux"]
 tags = ["内存", "C/C++"]
+[extra]
+comment_issue_term = "blog/2018/05/22/Linux/oom_analysis/index"
 +++
 
 最近在开发一款流媒体后视镜产品，发现触摸设备不响应触控事件，画面冻住不动，串口日志提示 Out of memory。而 release 版本看门狗程序未被注释（进入了编译分支），APP 进程因为 OOM 被 kill，无法及时喂狗，导致系统不断重启。
