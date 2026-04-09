@@ -19,7 +19,7 @@ tags = ["RTOS", "Zephyr", "LVGL", "QEMU"]
 
 相关 PR：
 
-- https://github.com/zephyrproject-rtos/zephyr/pull/106993
+- [https://github.com/zephyrproject-rtos/zephyr/pull/106993](https://github.com/zephyrproject-rtos/zephyr/pull/106993)
 
 ## 问题现象
 
