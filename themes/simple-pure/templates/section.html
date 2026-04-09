@@ -12,7 +12,13 @@
     {% endif %}
   </section>
 
-  {% for page in paginator.pages %}
+  {% if paginator is defined %}
+    {% set pages = paginator.pages %}
+  {% else %}
+    {% set pages = section.pages %}
+  {% endif %}
+
+  {% for page in pages %}
     <article class="card post-card">
       <p class="post-meta">{{ page.date | date(format="%Y-%m-%d") }}</p>
       <h2><a href="{{ page.permalink }}">{{ page.title }}</a></h2>
@@ -28,7 +34,7 @@
     </article>
   {% endfor %}
 
-  {% if paginator.number_pagers > 1 %}
+  {% if paginator is defined and paginator.number_pagers > 1 %}
     <nav class="card pager">
       {% if paginator.previous %}
         <a href="{{ paginator.previous }}">上一页</a>

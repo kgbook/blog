@@ -1,15 +1,11 @@
----
-layout: post
-title: Zephyr LVGL 异常显示问题分析
-date: 2026-04-09
-categories:
-- RTOS
-tags:
-- RTOS
-- Zephyr
-- LVGL
-- QEMU
----
++++
+title = "Zephyr LVGL 异常显示问题分析"
+date = 2026-04-09
+path = "2026/04/09/zephyr_lvgl_stack_overflow_analysis"
+[taxonomies]
+categories = ["RTOS"]
+tags = ["RTOS", "Zephyr", "LVGL", "QEMU"]
++++
 
 本文记录一次 `Zephyr + LVGL + qemu_riscv64` 的问题排查过程。表面现象是图形界面显示异常，最开始很像 `ramfb` 驱动或者像素格式问题；最终定位下来，根因其实是 `main()` 线程栈太小，导致 `LVGL redraw/flush` 路径运行时栈溢出。
 
