@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="760" viewBox="0 0 1120 760" role="img" aria-labelledby="title desc">
+  <title id="title">向低地址增长的线程栈示意图</title>
+  <desc id="desc">A stack diagram showing the stack pointer starting near high addresses and growing downward toward a stack sentinel at low addresses.</desc>
+  <defs>
+    <marker id="arrow-dark" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#222"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#b42318"/>
+    </marker>
+  </defs>
+
+  <rect width="1120" height="760" fill="#faf8f2"/>
+  <text x="510" y="100" text-anchor="middle" font-size="40" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, Helvetica, Arial, sans-serif" fill="#1f1f1f">向低地址增长的线程栈示意图</text>
+
+  <text x="150" y="170" text-anchor="middle" font-size="30" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, Helvetica, Arial, sans-serif" fill="#1f1f1f">高地址</text>
+  <line x1="150" y1="620" x2="150" y2="200" stroke="#222" stroke-width="4" marker-end="url(#arrow-dark)"/>
+  <text x="150" y="676" text-anchor="middle" font-size="30" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, Helvetica, Arial, sans-serif" fill="#1f1f1f">低地址</text>
+
+  <rect x="300" y="160" width="420" height="460" rx="16" fill="#ffffff" stroke="#222" stroke-width="3"/>
+
+  <rect x="334" y="198" width="352" height="136" rx="10" fill="#e7f0ff" stroke="#4e79a7" stroke-width="2.5"/>
+  <text x="510" y="255" text-anchor="middle" font-size="36" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, Helvetica, Arial, sans-serif" fill="#1f1f1f">可用栈空间</text>
+  <text x="510" y="298" text-anchor="middle" font-size="26" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, Helvetica, Arial, sans-serif" fill="#43536d">初始 SP 位于这里附近</text>
+
+  <rect x="334" y="362" width="352" height="190" rx="10" fill="#fff2db" stroke="#c27c2c" stroke-width="2.5"/>
+  <text x="510" y="430" text-anchor="middle" font-size="34" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, Helvetica, Arial, sans-serif" fill="#1f1f1f">调用帧 / 局部变量</text>
+  <text x="510" y="476" text-anchor="middle" font-size="26" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, Helvetica, Arial, sans-serif" fill="#6c4b1f">函数调用越深</text>
+  <text x="510" y="514" text-anchor="middle" font-size="26" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, Helvetica, Arial, sans-serif" fill="#6c4b1f">SP 越向下移动</text>
+
+  <rect x="314" y="570" width="392" height="42" rx="5" fill="#ffd7d7" stroke="#b42318" stroke-width="2.5"/>
+  <text x="510" y="599" text-anchor="middle" font-size="24" font-family="Helvetica, Arial, sans-serif" fill="#631b1b">STACK_SENTINEL = 0xF0F0F0F0</text>
+
+  <line x1="820" y1="220" x2="820" y2="590" stroke="#b42318" stroke-width="5" marker-end="url(#arrow-red)"/>
+  <text x="850" y="380" font-size="24" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, Helvetica, Arial, sans-serif" fill="#b42318">SP向低地址移动</text>
+  <text x="850" y="424" font-size="18" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, Helvetica, Arial, sans-serif" fill="#7a1f1f">继续向下移动</text>
+  <text x="850" y="458" font-size="18" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, Helvetica, Arial, sans-serif" fill="#7a1f1f">就会越界</text>
+  <text x="850" y="492" font-size="18" font-family="Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei, PingFang SC, Helvetica, Arial, sans-serif" fill="#7a1f1f">并覆盖sentinel</text>
+</svg>
