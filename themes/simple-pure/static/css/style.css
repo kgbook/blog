@@ -250,6 +250,11 @@ blockquote {
   margin-top: 16px;
 }
 
+.article-header .post-taxonomies {
+  margin-top: 18px;
+  margin-bottom: 20px;
+}
+
 .post-taxonomies a,
 .taxonomy-chip {
   display: inline-flex;
