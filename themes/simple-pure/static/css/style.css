@@ -45,12 +45,75 @@ pre {
   font-family: "SFMono-Regular", "JetBrains Mono", "Consolas", monospace;
 }
 
+code {
+  text-shadow: 0 1px #fff;
+  padding: 0.2em 0.4em;
+  margin: 0 0.3em;
+  color: #555;
+  background: #eee;
+  border-radius: 3px;
+  font-size: 85%;
+}
+
 pre {
   overflow-x: auto;
   padding: 1rem 1.1rem;
   border-radius: 16px;
   background: #182433;
   color: #edf2f7;
+}
+
+pre code {
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  text-shadow: none;
+  font-size: inherit;
+}
+
+pre.giallo {
+  margin: 10px 0;
+  padding: 15px 0;
+  border: 1px solid rgba(117, 138, 160, 0.18);
+  border-radius: 8px;
+  background: #fafafa !important;
+  color: #4d4d4c !important;
+  font-size: 13px;
+  line-height: 0.85;
+  box-shadow: none;
+}
+
+pre.giallo > code {
+  display: block;
+  counter-reset: line;
+}
+
+pre.giallo .giallo-l {
+  display: block;
+  position: relative;
+  line-height: 0.85;
+  padding: 0 16px 0 58px;
+}
+
+pre.giallo .giallo-l > span {
+  line-height: inherit;
+}
+
+pre.giallo .giallo-l:empty::after {
+  content: "\00a0";
+}
+
+pre.giallo .giallo-l::before {
+  counter-increment: line;
+  content: counter(line);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 42px;
+  color: #b3b3b3;
+  text-align: right;
+  padding-right: 12px;
+  user-select: none;
 }
 
 blockquote {
@@ -117,6 +180,12 @@ blockquote {
 .content,
 .sidebar {
   min-width: 0;
+}
+
+.sidebar {
+  position: sticky;
+  top: 24px;
+  align-self: start;
 }
 
 .sidebar .card {
@@ -360,6 +429,8 @@ blockquote {
   }
 
   .sidebar {
+    position: static;
+    top: auto;
     order: 2;
   }
 
