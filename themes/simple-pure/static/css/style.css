@@ -9,8 +9,8 @@
   --accent-soft: #d7e7f4;
   --shadow: 0 20px 50px rgba(32, 51, 72, 0.08);
   --radius: 22px;
-  --shell-width: 1460px;
-  --side-width: 292px;
+  --shell-width: 1680px;
+  --side-width: 320px;
 }
 
 * {
@@ -124,7 +124,7 @@ blockquote {
 }
 
 .site-shell {
-  width: min(var(--shell-width), calc(100% - 40px));
+  width: min(var(--shell-width), calc(100% - 24px));
   margin: 0 auto;
   padding: 28px 0 44px;
 }
@@ -173,7 +173,7 @@ blockquote {
 .layout {
   display: grid;
   grid-template-columns: minmax(250px, var(--side-width)) minmax(0, 1fr);
-  gap: 28px;
+  gap: 22px;
   align-items: start;
 }
 
