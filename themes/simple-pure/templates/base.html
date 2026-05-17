@@ -78,5 +78,14 @@
       <p>&copy; {{ now() | date(format="%Y") }} {{ config.title }}.</p>
     </footer>
   </div>
+  {% if config.extra.uml.enabled %}
+    <script>
+      window.CoolshinUml = {
+        assetBase: "{{ get_url(path='js') | safe }}",
+        plantumlServer: "{{ config.extra.uml.plantuml_server | safe }}"
+      };
+    </script>
+    <script defer src="{{ get_url(path='js/uml-renderer.js') }}"></script>
+  {% endif %}
 </body>
 </html>

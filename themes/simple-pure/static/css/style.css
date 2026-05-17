@@ -116,6 +116,45 @@ pre.giallo .giallo-l::before {
   user-select: none;
 }
 
+.uml-diagram {
+  margin: 1.35rem 0;
+}
+
+.uml-diagram__stage {
+  overflow-x: auto;
+  padding: 1rem;
+  border: 1px solid rgba(117, 138, 160, 0.18);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.uml-diagram__stage > svg,
+.uml-diagram__stage > img,
+.uml-diagram__stage > div > svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.uml-diagram__error {
+  color: #9b2c2c;
+  font-weight: 600;
+}
+
+.uml-diagram__source {
+  margin-top: 0.75rem;
+  color: var(--muted);
+}
+
+.uml-diagram__source summary {
+  cursor: pointer;
+}
+
+.uml-diagram__source pre {
+  margin-bottom: 0;
+}
+
 blockquote {
   margin: 1.25rem 0;
   padding: 0.2rem 0 0.2rem 1rem;

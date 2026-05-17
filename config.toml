@@ -39,6 +39,10 @@ menu = [
   { name = "关于", path = "about" },
 ]
 
+[extra.uml]
+enabled = true
+plantuml_server = "https://www.plantuml.com/plantuml"
+
 [extra.comments]
 provider = "giscus"
 repo = "kgbook/blog"

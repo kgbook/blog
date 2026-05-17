@@ -1,7 +1,7 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-This repository is a Zola blog. Write posts under `content/blog/`, using page bundles when a post has local images. Standalone pages live directly under `content/`, and site-wide settings belong in [`config.toml`](/Users/dl/tools/blog/config.toml). Theme-specific templates and assets live under `themes/simple-pure/`, with templates in `themes/simple-pure/templates/` and static assets in `themes/simple-pure/static/`. Do not edit generated output such as `public/`.
+This repository is a Zola blog. Write posts under `content/blog/`, using page bundles when a post has local images. Standalone pages live directly under `content/`, and site-wide settings belong in [`config.toml`](/home/cory/tools/coolshin.work.gd/config.toml). Theme-specific templates and assets live under `themes/simple-pure/`, with templates in `themes/simple-pure/templates/` and static assets in `themes/simple-pure/static/`. Do not edit generated output such as `public/`.
 
 ## Build, Test, and Development Commands
 Install `zola` locally. Use `zola serve` to start the local dev server, usually at `http://127.0.0.1:1111`. Use `zola build` to generate the static site into `public/`. Use `rm -rf public` before a rebuild if stale output is suspected. Use `zola check` for template and link validation.
@@ -11,6 +11,11 @@ Write Markdown with clear front matter and concise filenames. Keep TOML indentat
 
 ## Testing Guidelines
 There is no automated test suite in the root project. Treat `zola build` as the required verification step for every content or theme change, and use `zola serve` for manual checks of navigation, post rendering, and asset loading. When editing templates or CSS, verify at least the home page, a post page, and one archive-style page.
+
+## UML Diagram Rendering
+Markdown code fences using `plantuml`, `puml`, `mermaid`, `dot`, `graphviz`, `flow`, `flowchart`, `wavedrom`, or `wave` are rendered in the browser by `themes/simple-pure/static/js/uml-renderer.js`. Keep this runtime framework-free and loaded from `themes/simple-pure/templates/base.html`; it should lazy-load vendor assets from `themes/simple-pure/static/js/vendor/` only when matching diagrams exist on the page. PlantUML uses `extra.uml.plantuml_server` from `config.toml`. When changing UML rendering, verify a post page with real diagram fences after `zola build` or `zola serve`.
+
+The UML rendering approach was implemented with reference to VNote's Markdown preview pipeline in `/home/cory/tools/vnote`, including its language routing for PlantUML, Mermaid, Graphviz, Flowchart.js, and WaveDrom. Preserve that acknowledgement in user-facing documentation when moving or rewriting this feature.
 
 ## Commit & Pull Request Guidelines
 Follow short, conventional commit subjects such as `feat: ...` and `fix: ...`. Keep commits focused and imperative, for example `feat: migrate blog to zola`. Pull requests should include a short summary, note any config, content, or template paths changed, link related issues if present, and add screenshots for visible theme or layout changes.
