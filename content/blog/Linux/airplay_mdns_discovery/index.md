@@ -1,19 +1,19 @@
 +++
-title = "UxPlay AirPlay mDNS 设备发现重做"
+title = "AirPlay 投屏设备发现"
 date = 2026-05-16
-path = "2026/05/16/uxplay_airplay_mdns_discovery"
+path = "2026/05/16/airplay_mdns_discovery"
 [taxonomies]
 categories = ["Linux"]
-tags = ["AirPlay", "mDNS", "DNS-SD", "UxPlay", "Android", "网络分析"]
+tags = ["AirPlay", "mDNS", "DNS-SD", "Android", "网络分析"]
 +++
 
-本文记录一次 UxPlay AirPlay 设备发现链路的重做过程。
+本文记录一次 AirPlay 设备发现链路的重做过程。
 
-问题的表面现象是“Apple 设备发现不了投屏服务”，但真正需要解决的不是某一次网络不通，而是 UxPlay 对外部 DNS-SD 实现的依赖太重。桌面 Linux 可以依赖 `avahi-daemon`，但 Android、嵌入式 Linux、裁剪系统里不一定有这个 daemon，也不一定适合额外跑一个系统服务。
+问题的表面现象是“Apple 设备发现不了投屏服务”，但真正需要解决的不是某一次网络不通，而是对外部 DNS-SD 实现的依赖太重。桌面 Linux 可以依赖 `avahi-daemon`，但 Android、ARM Linux、RTOS等没有这个 daemon，也不一定适合额外跑一个系统服务; Apple官方apple-oss-distributions/mDNSResponder工程又太过复杂。
 
-最终方案是：保留 UxPlay 现有的 AirPlay/RAOP 协议处理，把 mDNS/DNS-SD 服务发现内置到项目里。`dnssd.c` 只负责生成 AirPlay/RAOP 服务信息，新增 `mdnsd.c` 负责 UDP 5353、组播、DNS 包解析和响应。
+最终方案是：保留现有的 AirPlay/RAOP 协议处理，把 mDNS/DNS-SD 服务发现内置到项目里。`dnssd.c` 只负责生成 AirPlay/RAOP 服务信息，新增 `mdnsd.c` 负责 UDP 5353、组播、DNS 包解析和响应。
 
-## 先讲清楚：设备发现到底是什么
+## 设备发现到底是什么 ？
 
 AirPlay 设备发现不是“手机去扫局域网里所有 IP”，而是通过 mDNS/DNS-SD 完成的。
 
@@ -21,7 +21,7 @@ AirPlay 设备发现不是“手机去扫局域网里所有 IP”，而是通过
 
 1. Apple 设备向 `224.0.0.251:5353` 发 UDP 组播查询。
 2. 查询内容是“谁提供 `_airplay._tcp.local` 服务？”以及“谁提供 `_raop._tcp.local` 服务？”。
-3. UxPlay 收到查询后，也向 `224.0.0.251:5353` 或查询方单播地址回复。
+3. Airplay投屏器/APP 收到查询后，也向 `224.0.0.251:5353` 或查询方单播地址回复。
 4. 回复里包含服务名、端口、主机名、IP 地址和能力字段。
 5. Apple 设备拿到这些信息后，才知道后续 AirPlay/RAOP 连接该连到哪里。
 
@@ -29,7 +29,7 @@ AirPlay 设备发现不是“手机去扫局域网里所有 IP”，而是通过
 
 `mDNS` 是 multicast DNS，即组播 DNS。它不依赖路由器上的 DNS 服务器，而是在本地链路里用 `224.0.0.251:5353` 直接问答。
 
-`DNS-SD` 是 DNS Service Discovery，即用 DNS 记录描述“这里有什么服务”。AirPlay 设备发现用的就是 DNS-SD。
+`DNS-SD` 是 DNS Service Discovery，即用 DNS 记录描述“这里有什么服务”，AirPlay 设备发现用的就是 DNS-SD。
 
 ## 为什么要重做
 
@@ -41,31 +41,29 @@ AirPlay 设备发现不是“手机去扫局域网里所有 IP”，而是通过
 
 这个方案在桌面系统上可用，但移植到 Android 或轻量环境时会遇到几个实际问题。
 
-第一，`avahi-daemon` 对这个场景偏重。它是系统级 daemon，功能完整，但 UxPlay 只需要回答两个服务类型的查询：`_airplay._tcp.local` 和 `_raop._tcp.local`。
+第一，`avahi-daemon` 对这个场景偏重。它是系统级 daemon，功能完整，但 Airplay投屏接收端只需要回答两个服务类型的查询：`_airplay._tcp.local` 和 `_raop._tcp.local`。
 
-第二，Android 环境不适合假设存在 Avahi。Android 应用或 Native 服务更常见的部署方式是自己打开 socket，自己处理网络协议，而不是要求系统额外安装并运行一个 mDNS daemon。
+第二，Android 环境不适合假设存在 Avahi。Android 应用或 Native 服务更常见的部署方式是自己创建 socket，自己处理网络协议，而不是要求系统额外安装并运行一个 mDNS daemon。
 
 第三，跨平台依赖变复杂。Linux、macOS、Windows、Android 的 DNS-SD 库和头文件都不一样。项目里为了处理这些差异，需要保留很多动态加载、条件编译和错误分支。
 
-第四，排查成本高。一旦发现失败，要同时考虑 UxPlay、`libdns_sd`、Avahi daemon、系统服务状态、动态库路径、权限、端口占用、防火墙和组播转发。问题边界不清楚。
+第四，排查成本高。一旦发现失败，要同时考虑`libdns_sd`、Avahi daemon、系统服务状态、动态库路径、权限、端口占用、防火墙和组播转发。问题边界不清楚。
 
 所以这次重做的目标很明确：
 
 - 去掉 Avahi/Bonjour SDK/libdns_sd 运行时依赖。
-- 内置一个只覆盖 UxPlay 所需能力的 mDNS responder。
+- 内置一个只覆盖 Airplay投屏接收器/APP 所需能力的 mDNS responder。
 - 代码保持简单，不做通用 mDNS 框架。
 - 对外行为尽量保持和抓包里的 AirPlay 设备期望一致。
 
 ## 抓包环境
 
-抓包文件是 `airplay-mdns.pcapng`。
-
-现场有两个关键地址：
+抓包现场有两个关键地址：
 
 - Apple 设备：`192.168.6.186`
-- UxPlay 主机：`192.168.6.204`
+- Airplay投屏器主机：`192.168.6.204`
 
-敏感字段在本文里会脱敏，比如 MAC 地址、公钥等只展示结构，不展示完整值。
+其它敏感字段在本文里会脱敏，比如 MAC 地址、公钥等只展示结构，不展示完整值。
 
 ## 设备发现总流程
 
@@ -88,11 +86,11 @@ Apple -> UxPlay: 后续连接 AirPlay/RAOP 端口
 @enduml
 ```
 
-关键点是：设备发现阶段只解决“服务在哪里”和“服务能力是什么”，并不传输投屏画面。真正的投屏协议连接发生在发现之后。
+关键点是：设备发现阶段只解决“服务在哪里”和“服务能力是什么”，并不传输投屏画面，真正的投屏连接发生在设备发现之后。
 
 ## 从抓包时间线还原发现过程
 
-只看单个包容易丢掉上下文。设备发现要按时间线看，才能理解 Apple 设备和 UxPlay 各自在做什么。
+只看单个包容易丢掉上下文。设备发现要按时间线看，才能理解 Apple 设备和 Airplay投屏器/APP 各自在做什么。
 
 下面是抓包里和 AirPlay/RAOP 发现相关的一段简化时间线。为了避免泄漏设备标识，服务实例里的 MAC 和公钥都做了脱敏。
 
