@@ -10,7 +10,8 @@
   --shadow: 0 20px 50px rgba(32, 51, 72, 0.08);
   --radius: 22px;
   --shell-width: 1680px;
-  --side-width: 320px;
+  --side-width: clamp(280px, 18vw, 340px);
+  --page-gutter: clamp(10px, 1.25vw, 24px);
 }
 
 * {
@@ -163,9 +164,10 @@ blockquote {
 }
 
 .site-shell {
-  width: min(var(--shell-width), calc(100% - 24px));
-  margin: 0 auto;
-  padding: 28px 0 44px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 28px var(--page-gutter) 44px;
 }
 
 .site-header {
@@ -211,8 +213,8 @@ blockquote {
 
 .layout {
   display: grid;
-  grid-template-columns: minmax(250px, var(--side-width)) minmax(0, 1fr);
-  gap: 22px;
+  grid-template-columns: var(--side-width) minmax(0, 1fr);
+  gap: 20px;
   align-items: start;
 }
 
@@ -486,8 +488,8 @@ blockquote {
 
 @media (max-width: 640px) {
   .site-shell {
-    width: calc(100% - 20px);
-    padding-top: 20px;
+    width: 100%;
+    padding: 20px 10px 36px;
   }
 
   .card {
