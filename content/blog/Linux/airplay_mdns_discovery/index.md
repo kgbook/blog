@@ -71,11 +71,22 @@ AirPlay 设备发现不是“手机去扫局域网里所有 IP”，而是通过
 
 先用一张时序图看完整流程。
 
-<div style="text-align: center;">
+```plantuml
+@startuml
+title AirPlay mDNS/DNS-SD discovery
 
-![AirPlay mDNS/DNS-SD discovery](images/airplay-mdns-discovery.svg)
+actor "Apple 设备\n192.168.6.186" as Apple
+participant "mDNS 组播地址\n224.0.0.251:5353" as MDNS
+participant "UxPlay 主机\n192.168.6.204" as UxPlay
 
-</div>
+Apple -> MDNS: PTR query\n_airplay._tcp.local\n_raop._tcp.local\nclass IN + QU
+MDNS -> UxPlay: 局域网组播转发
+UxPlay -> MDNS: PTR/SRV/TXT/A response\nAirPlay + RAOP
+MDNS -> Apple: Apple 设备收到服务描述
+Apple -> UxPlay: 后续连接 AirPlay/RAOP 端口
+
+@enduml
+```
 
 关键点是：设备发现阶段只解决“服务在哪里”和“服务能力是什么”，并不传输投屏画面。真正的投屏协议连接发生在发现之后。
 
@@ -105,11 +116,24 @@ AirPlay 设备发现不是“手机去扫局域网里所有 IP”，而是通过
 
 设备发现可以画成更细的状态图：
 
-<div style="text-align: center;">
+```plantuml
+@startuml
+title Discovery states from packet capture
 
-![Discovery states from packet capture](images/discovery-state-flow.svg)
+[*] --> ServerStarts
+ServerStarts --> ProbeAndAnnounce : UxPlay starts
+ProbeAndAnnounce --> MulticastVisible : PTR/SRV/TXT/A announced
+MulticastVisible --> ClientQueries : Apple opens AirPlay device list
+ClientQueries --> AnswerMatched : _airplay/_raop PTR matched
+AnswerMatched --> ClientCaches : client caches TXT/SRV/A
+ClientCaches --> ConnectProtocol : client connects AirPlay/RAOP port
+ConnectProtocol --> [*]
 
-</div>
+ClientQueries --> ClientQueries : repeated mDNS query
+ProbeAndAnnounce --> ProbeAndAnnounce : repeated announcement
+
+@enduml
+```
 
 ## 抓包分析：Apple 设备怎么问
 
@@ -163,11 +187,30 @@ Known answers:
 
 一个完整的 AirPlay/RAOP DNS-SD 服务描述不是单条记录，而是一组记录。
 
-<div style="text-align: center;">
+```plantuml
+@startuml
+title DNS-SD records used by AirPlay discovery
 
-![DNS-SD records used by AirPlay discovery](images/dnssd-records.svg)
+rectangle "_services._dns-sd._udp.local" as Services
+rectangle "_airplay._tcp.local" as AirPlayType
+rectangle "_raop._tcp.local" as RaopType
+rectangle "UxPlay@hostname._airplay._tcp.local" as AirPlayInst
+rectangle "<mac>@UxPlay@hostname._raop._tcp.local" as RaopInst
+rectangle "hostname.local" as Host
+rectangle "192.168.x.x" as IPv4
 
-</div>
+Services --> AirPlayType : PTR
+Services --> RaopType : PTR
+AirPlayType --> AirPlayInst : PTR
+RaopType --> RaopInst : PTR
+AirPlayInst --> Host : SRV + port
+RaopInst --> Host : SRV + port
+AirPlayInst --> AirPlayInst : TXT
+RaopInst --> RaopInst : TXT
+Host --> IPv4 : A
+
+@enduml
+```
 
 这里每种记录有不同作用。
 
@@ -314,11 +357,33 @@ AirPlay 记录更偏向视频、镜像、配对和设备身份描述。
 
 代码上把职责拆成两层。
 
-<div style="text-align: center;">
+```plantuml
+@startuml
+title UxPlay mDNS implementation split
 
-![UxPlay mDNS implementation split](images/uxplay-mdns-split.svg)
+package "UxPlay main" {
+  [uxplay.cpp] as UxPlay
+}
 
-</div>
+package "DNS-SD service layer" {
+  [lib/dnssd.c] as Dnssd
+  [lib/dnssd.h] as DnssdH
+}
+
+package "mDNS protocol layer" {
+  [lib/mdnsd.c] as Mdnsd
+  [lib/mdnsd.h] as MdnsdH
+}
+
+UxPlay --> Dnssd : dnssd_init/register/unregister
+Dnssd --> Mdnsd : mdnsd_set_services\nmdnsd_start\nmdnsd_announce
+Mdnsd --> "UDP 5353" : socket\nmulticast\nsendto/recvfrom
+
+DnssdH ..> Dnssd
+MdnsdH ..> Mdnsd
+
+@enduml
+```
 
 `dnssd.c` 保留业务含义：
 
@@ -343,7 +408,32 @@ AirPlay 记录更偏向视频、镜像、配对和设备身份描述。
 
 旧方案和新方案的边界差异如下。
 
-![Old external DNS-SD dependency vs built-in responder](images/old-vs-new-mdns.svg)
+```plantuml
+@startuml
+title Old external DNS-SD dependency vs built-in responder
+
+rectangle "Old design" {
+  [UxPlay] as OldUx
+  [libdns_sd API] as Libdns
+  [Avahi daemon / Bonjour] as Daemon
+  [UDP 5353] as OldUdp
+  OldUx --> Libdns
+  Libdns --> Daemon
+  Daemon --> OldUdp
+}
+
+rectangle "New design" {
+  [UxPlay] as NewUx
+  [dnssd.c\nservice data] as NewDnssd
+  [mdnsd.c\npacket + socket] as NewMdnsd
+  [UDP 5353] as NewUdp
+  NewUx --> NewDnssd
+  NewDnssd --> NewMdnsd
+  NewMdnsd --> NewUdp
+}
+
+@enduml
+```
 
 旧方案把发现能力交给系统服务，新方案把发现能力收回到 UxPlay 进程内。这样做不是为了重复造一个完整 Avahi，而是因为 UxPlay 只需要一个很小的协议子集。
 
@@ -368,11 +458,47 @@ AirPlay 记录更偏向视频、镜像、配对和设备身份描述。
 
 运行时流程可以画成这样：
 
-<div style="text-align: center;">
+```plantuml
+@startuml
+title Runtime flow
 
-![Runtime flow](images/runtime-flow.svg)
+start
+:uxplay.cpp 初始化设备名和硬件地址;
+:dnssd_init();
+:生成 hostname.local;
+:生成 AirPlay/RAOP 实例名;
 
-</div>
+if (注册 RAOP?) then (yes)
+  :构造 RAOP TXT;
+  :mdnsd_set_services();
+  :mdnsd_start();
+  :发送 RAOP announce;
+endif
+
+if (注册 AirPlay?) then (yes)
+  :构造 AirPlay TXT;
+  :mdnsd_set_services();
+  :mdnsd_start();
+  :发送 AirPlay announce;
+endif
+
+repeat
+  :recvfrom UDP 5353;
+  :解析 DNS header 和 questions;
+  if (命中 _airplay 或 _raop?) then (yes)
+    :按服务构造响应包;
+    :发组播响应;
+    if (QU 或源端口不是 5353?) then (yes)
+      :发单播响应给查询方;
+    endif
+  endif
+repeat while (UxPlay running)
+
+:unregister 时发送 goodbye TTL=0;
+stop
+
+@enduml
+```
 
 实现里没有做成通用 mDNS 框架，原因是 UxPlay 不需要完整框架。它只需要服务发现所需的最小闭环。
 
