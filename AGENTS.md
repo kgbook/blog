@@ -1,7 +1,8 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-This repository is a Zola blog. Write posts under `content/blog/`, using page bundles when a post has local images. Standalone pages live directly under `content/`, and site-wide settings belong in [`config.toml`](/home/cory/tools/coolshin.work.gd/config.toml). Theme-specific templates and assets live under `themes/simple-pure/`, with templates in `themes/simple-pure/templates/` and static assets in `themes/simple-pure/static/`. Do not edit generated output such as `public/`.
+This repository is a Zola blog. Write posts under `content/blog/`, using page bundles when a post has local images. Standalone pages live directly under `content/`, and site-wide settings belong in `config.toml`. Theme-specific templates and assets live under `themes/simple-pure/`, with templates in `themes/simple-pure/templates/` and static assets in `themes/simple-pure/static/`. Do not edit generated output such as `public/`.
+
 
 ## Build, Test, and Development Commands
 Install `zola` locally. Use `zola serve` to start the local dev server, usually at `http://127.0.0.1:1111`. Use `zola build` to generate the static site into `public/`. Use `rm -rf public` before a rebuild if stale output is suspected. Use `zola check` for template and link validation.
