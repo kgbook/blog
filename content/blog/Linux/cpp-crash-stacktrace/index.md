@@ -13,7 +13,7 @@ tags = ["C/C++", "Crash", "Debug", "libunwind", "libbacktrace"]
 2. [先把概念讲清楚](#_2)
 3. [crashtrace 的整体设计](#_3)
 4. [核心依赖](#_4)
-5. [addr2line 和 libbacktrace 怎么选](#_5)
+5. [symbolizer 怎么选](#_5)
 6. [三个核心 API](#_6)
 7. [调试环境怎么跑](#_7)
 8. [生产环境怎么跑](#_8)
@@ -327,22 +327,9 @@ stop
 @enduml
 ```
 
-### 4.2 Linux 用 third_party/libunwind 采集栈地址
+### 4.2 Linux 用 libunwind 采集栈地址
 
-Linux 上使用仓库内置的 GNU `libunwind`：
-
-```text
-third_party/libunwind
-```
-
-当前构建策略是把它编译成 shared `.so`，而不是静态 `.a`：
-
-```text
-libunwind.so
-libunwind-x86_64.so / libunwind-aarch64.so / libunwind-arm.so ...
-```
-
-这样做更接近真实 Linux/ARM Linux/Android native 发布形态：`libcrashtrace.so` 作为业务侧 crash 库动态链接 vendored `libunwind*.so*`，产物发布时把这些 `.so` 放在同一目录，通过 `$ORIGIN` rpath 优先加载随包携带的版本，避免误用系统或包管理器里的 `libunwind`。
+Linux 上使用仓库内置的 GNU `libunwind`， 当前构建策略是把它编译成 shared `.so`，而不是静态 `.a`，这样做更接近真实 Linux/ARM Linux/Android native 发布形态：`libcrashtrace.so` 作为业务侧 crash 库动态链接 vendored `libunwind*.so*`，发布时把这些 `.so` 放在同一目录，通过 `$ORIGIN` rpath 优先加载随包携带的版本，避免误用系统或包管理器里的 `libunwind`。
 
 它通过当前 CPU 上下文初始化游标，然后一帧一帧向上走：
 
@@ -381,7 +368,7 @@ skinparam defaultFontColor #111111
 
 start
 if (平台?) then (Linux / ELF)
-  :构建 third_party/libunwind;
+  :构建 libunwind;
   :生成 libunwind.so;
   :libcrashtrace.so 动态链接\nvendored libunwind.so;
   :用 unw_getcontext / unw_step 采集 PC;
@@ -389,7 +376,7 @@ else (macOS / Mach-O)
   :不构建 GNU libunwind 本地 unwinder;
   :用 _Unwind_Backtrace 采集 PC;
 endif
-:统一用 third_party/libbacktrace 符号化;
+:统一用 libbacktrace 符号化;
 stop
 @enduml
 ```
@@ -431,7 +418,7 @@ sudo apt-get install -y \
 
 ---
 
-## 5. addr2line 和 libbacktrace 怎么选<span id="_5"></span>
+## 5. symbolizer 怎么选<span id="_5"></span>
 
 看到这里你可能会问：地址转源码位置，不是 `addr2line`、`ndk-stack`、`llvm-symbolizer` 这些工具也能做吗？
 
@@ -948,67 +935,6 @@ fi
 backtrace_symbolizer --symbols "${SYMBOLS}" --frames "${LOG_PATH}"
 ```
 
-### 9.4 CMake 的关键点
-
-项目现在构建 `libcrashtrace` 动态库：
-
-```cmake
-add_library(crashtrace SHARED
-    src/crashtrace.cpp
-)
-```
-
-Linux 上如果存在 `libunwind::libunwind` 目标，就链接 vendored libunwind：
-
-```cmake
-if (TARGET libunwind::libunwind)
-    target_link_libraries(crashtrace PUBLIC
-        libunwind::libunwind
-    )
-endif()
-```
-
-代码里不再靠 CMake 注入私有宏选择 unwinder，而是直接使用编译器预定义平台宏：
-
-```cpp
-#if defined(__APPLE__)
-#include <unwind.h>
-#else
-#define UNW_LOCAL_ONLY
-#include <libunwind.h>
-#endif
-```
-
-`__APPLE__` 是 Apple 平台的编译器预定义宏。本文的验证目标是 macOS 和 Linux，所以用它区分 macOS/Mach-O 与 Linux/ELF 足够清晰：macOS 走 `_Unwind_Backtrace`，非 macOS 走 vendored GNU libunwind。
-
-Linux 的 vendored libunwind 现在由 autotools 构建为 shared library：
-
-```cmake
-"--enable-shared"
-"--disable-static"
-```
-
-导入目标也使用 shared `.so`：
-
-```cmake
-set(LIBUNWIND_LIBRARY "${LIBUNWIND_INSTALL_DIR}/lib/libunwind.so")
-set(LIBUNWIND_ARCH_LIBRARY
-    "${LIBUNWIND_INSTALL_DIR}/lib/libunwind-${LIBUNWIND_ARCH_NAME}.so")
-add_library(libunwind::libunwind SHARED IMPORTED GLOBAL)
-```
-
-为了让可执行文件能在同目录找到动态库，CMake 设置了 rpath：
-
-```cmake
-if (APPLE)
-    set(_crashtrace_rpath "@loader_path")
-else()
-    set(_crashtrace_rpath "$ORIGIN")
-endif()
-```
-
----
-
 ## 10. GitHub Actions 自动编译<span id="_10"></span>
 
 仓库新增了 GitHub Actions workflow，push 和 pull request 都会自动编译。
@@ -1087,14 +1013,6 @@ cmake --build build --parallel \
 
 这不影响符号解析。macOS 仍然用 `third_party/libbacktrace` 读取符号信息，并配合 `dsymutil` 生成 dSYM。
 
-### 11.5 这套方案适合直接上生产吗
+### 12. 代码下载
 
-这套代码适合作为最小可运行模型和工程参考。真正上生产还要继续加强：
-
-- signal handler 内减少堆分配、锁和复杂 I/O。
-- 使用预分配缓冲区或 async-signal-safe 写日志方式。
-- 崩溃日志带上 build id 和版本号。
-- 上传日志后在服务端批量离线符号化。
-- 符号文件归档要和发布系统绑定。
-
-如果你刚开始学习 C++ 崩溃栈，先把这套 demo 跑通，再看 `lib/src/crashtrace.cpp`，会比直接读大型 crash reporter 更容易理解。
+[crashtrace](https://github.com/kgbook/crashtrace)
