@@ -7,8 +7,6 @@ categories = ["Linux"]
 tags = ["C/C++", "Crash", "Debug", "libunwind", "libbacktrace"]
 +++
 
-[TOC]
-
 ## 一、问题背景
 
 C++ 程序线上崩溃时，最常见的日志可能只有一句：
@@ -161,16 +159,14 @@ stop
 
 ## 三、crashtrace 的整体设计
 
-### 3.1 一句话概括
-
-`crashtrace` 做了两件事：
+一句话概括， `crashtrace` 做了两件事：
 
 - 采集调用栈地址。
 - 把调用栈地址解析成源码位置。
 
 Debug 场景把这两件事放在崩溃现场做。Release 场景只在崩溃现场做第一件事，把第二件事留给离线工具。
 
-### 3.2 架构图
+### 3.1 架构图
 
 ```plantuml
 @startuml
@@ -215,7 +211,7 @@ LibBacktrace --> DebugInfo
 @enduml
 ```
 
-### 3.3 两条工作流
+### 3.2 流程图
 
 ```plantuml
 @startuml

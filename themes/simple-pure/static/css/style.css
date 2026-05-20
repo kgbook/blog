@@ -478,37 +478,72 @@ blockquote {
 
 .article-toc {
   margin: 1.5rem 0 2rem;
-  padding: 18px 20px;
-  border: 1px solid rgba(47, 111, 163, 0.18);
-  border-radius: 18px;
-  background: linear-gradient(135deg, rgba(215, 231, 244, 0.62), rgba(255, 255, 255, 0.74));
+  padding: 16px 18px;
+  border: 1px solid rgba(47, 111, 163, 0.14);
+  border-radius: 14px;
+  background: rgba(215, 231, 244, 0.32);
 }
 
 .article-toc__title {
-  margin-bottom: 0.7rem;
-  color: var(--muted);
-  font-size: 0.86rem;
+  margin: 0 0 0.75rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid rgba(117, 138, 160, 0.16);
+  color: var(--text);
+  font-size: 0.95rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .article-toc__list {
   margin: 0;
-  padding-left: 1.15rem;
+  padding-left: 0;
+  list-style: none;
 }
 
 .article-toc__list .article-toc__list {
-  margin-top: 0.28rem;
+  margin-top: 0.22rem;
+  padding-left: 0.9rem;
 }
 
 .article-toc__item {
-  margin: 0.18rem 0;
-  color: var(--accent);
+  margin: 0;
+  color: var(--muted);
+}
+
+.article-toc__item + .article-toc__item {
+  margin-top: 0.3rem;
 }
 
 .article-toc__item a {
+  display: block;
+  padding: 0.12rem 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.45;
   overflow-wrap: anywhere;
+}
+
+.article-toc__item a:hover {
+  color: var(--accent);
+}
+
+.article-toc__item--level-2 > a {
+  color: var(--text);
+  font-size: 0.96rem;
+  font-weight: 700;
+}
+
+.article-toc__item--level-3 > a {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.article-toc__item--level-4 > a,
+.article-toc__item--level-5 > a,
+.article-toc__item--level-6 > a {
+  color: rgba(98, 113, 132, 0.86);
+  font-size: 0.86rem;
 }
 
 .comment-card h2 {
