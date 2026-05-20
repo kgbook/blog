@@ -26,6 +26,8 @@
 
 {% block title %}{{ page.title }} | {{ config.title }}{% endblock title %}
 {% block description %}{{ page.description | default(value=config.description) }}{% endblock description %}
+{% block layout_class %} layout--article{% endblock layout_class %}
+{% block sidebar %}{% endblock sidebar %}
 
 {% block content %}
   <article class="card article-card">

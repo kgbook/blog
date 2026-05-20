@@ -12,6 +12,7 @@
   --shell-width: 1680px;
   --side-width: clamp(280px, 18vw, 340px);
   --page-gutter: clamp(10px, 1.25vw, 24px);
+  --content-width: 1080px;
 }
 
 * {
@@ -227,6 +228,13 @@ blockquote {
   grid-template-columns: var(--side-width) minmax(0, 1fr);
   gap: 20px;
   align-items: start;
+}
+
+.layout--article {
+  width: 100%;
+  max-width: var(--content-width);
+  margin: 0 auto;
+  display: block;
 }
 
 .content,
