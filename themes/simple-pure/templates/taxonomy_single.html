@@ -19,7 +19,7 @@
     <article class="card post-card">
       <p class="post-meta">{{ page.date | date(format="%Y-%m-%d") }}</p>
       <h2><a href="{{ page.permalink }}">{{ page.title }}</a></h2>
-      <p>{{ page.content | striptags | truncate(length=180) }}</p>
+      <p>{{ page.content | striptags | replace(from="[TOC]", to="") | truncate(length=180) }}</p>
     </article>
   {% endfor %}
 {% endblock content %}

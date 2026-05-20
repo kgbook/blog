@@ -1,5 +1,29 @@
 {% extends "base.html" %}
 
+{% macro toc_items(items) %}
+  <ul class="article-toc__list">
+    {% for item in items %}
+      {% if item.title != "目录" %}
+        <li class="article-toc__item article-toc__item--level-{{ item.level }}">
+          <a href="{{ item.permalink | safe }}">{{ item.title }}</a>
+          {% if item.children %}
+            {{ self::toc_items(items=item.children) }}
+          {% endif %}
+        </li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+{% endmacro toc_items %}
+
+{% macro toc(page_toc) %}
+  {% if page_toc %}
+    <nav class="article-toc" aria-label="文章目录">
+      <div class="article-toc__title">目录</div>
+      {{ self::toc_items(items=page_toc) }}
+    </nav>
+  {% endif %}
+{% endmacro toc %}
+
 {% block title %}{{ page.title }} | {{ config.title }}{% endblock title %}
 {% block description %}{{ page.description | default(value=config.description) }}{% endblock description %}
 
@@ -15,7 +39,9 @@
       </div>
     </header>
     <div class="markdown-body">
-      {{ page.content | safe }}
+      {% set toc_placeholder = "<p>[TOC]</p>" %}
+      {% set toc_html = self::toc(page_toc=page.toc) %}
+      {{ page.content | replace(from=toc_placeholder, to=toc_html) | safe }}
     </div>
   </article>
 
