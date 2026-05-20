@@ -1,6 +1,6 @@
 # coolshin blog
 
-Personal Zola blog for `coolshin`, using a local `simple-pure` theme and deployed with GitHub Pages.
+Personal [Zola](https://github.com/getzola/zola) blog for `coolshin`, using a local `simple-pure` theme and deployed with GitHub Pages.
 
 ## Stack
 
