@@ -576,9 +576,7 @@ blockquote {
   }
 
   .sidebar {
-    position: static;
-    top: auto;
-    order: 2;
+    display: none;
   }
 
   .archive-item {
