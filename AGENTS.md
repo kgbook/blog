@@ -16,7 +16,7 @@ There is no automated test suite in the root project. Treat `zola build` as the 
 ## UML Diagram Rendering
 Markdown code fences using `plantuml`, `puml`, `mermaid`, `dot`, `graphviz`, `flow`, `flowchart`, `wavedrom`, or `wave` are rendered in the browser by `themes/simple-pure/static/js/uml-renderer.js`. Keep this runtime framework-free and loaded from `themes/simple-pure/templates/base.html`; it should lazy-load vendor assets from `themes/simple-pure/static/js/vendor/` only when matching diagrams exist on the page. PlantUML uses `extra.uml.plantuml_server` from `config.toml`. When changing UML rendering, verify a post page with real diagram fences after `zola build` or `zola serve`.
 
-The UML rendering approach was implemented with reference to VNote's Markdown preview pipeline in `/home/cory/tools/vnote`, including its language routing for PlantUML, Mermaid, Graphviz, Flowchart.js, and WaveDrom. Preserve that acknowledgement in user-facing documentation when moving or rewriting this feature.
+The UML rendering approach was implemented with reference to VNote's Markdown preview pipeline in [VNote](https://github.com/vnotex/vnote), including its language routing for PlantUML, Mermaid, Graphviz, Flowchart.js, and WaveDrom. Preserve that acknowledgement in user-facing documentation when moving or rewriting this feature.
 
 ## Commit & Pull Request Guidelines
 Follow short, conventional commit subjects such as `feat: ...` and `fix: ...`. Keep commits focused and imperative, for example `feat: migrate blog to zola`. Pull requests should include a short summary, note any config, content, or template paths changed, link related issues if present, and add screenshots for visible theme or layout changes.

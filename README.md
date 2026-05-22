@@ -13,7 +13,7 @@ Personal [Zola](https://github.com/getzola/zola) blog for `coolshin`, using a lo
 Install `zola` first, then run:
 
 ```bash
-zola serve --interface 127.0.0.1 --port 1111
+zola serve
 ```
 
 Build the static site into `public/`:
@@ -37,7 +37,7 @@ rm -rf public
 ## Content structure
 
 - Site config: `config.toml`
-- Posts: `content/blog/`
+- Posts: `content/articles`
 - Standalone pages: `content/about.md`, `content/archives.md`
 - Theme templates and assets: `themes/simple-pure/`
 
