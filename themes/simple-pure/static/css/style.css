@@ -12,7 +12,6 @@
   --shell-width: 1680px;
   --side-width: clamp(280px, 18vw, 340px);
   --page-gutter: clamp(10px, 1.25vw, 24px);
-  --content-width: 1080px;
 }
 
 * {
@@ -232,8 +231,6 @@ blockquote {
 
 .layout--article {
   width: 100%;
-  max-width: var(--content-width);
-  margin: 0 auto;
   display: block;
 }
 
@@ -276,6 +273,11 @@ blockquote {
 
 .hero-card {
   padding: 30px 28px;
+}
+
+.article-card,
+.comment-card {
+  padding: clamp(24px, 3vw, 42px);
 }
 
 .page-header h1,
