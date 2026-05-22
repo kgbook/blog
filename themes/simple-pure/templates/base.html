@@ -32,7 +32,6 @@
         <aside class="sidebar">
           <div class="card profile-card">
             <img class="avatar" src="{{ get_url(path=config.extra.avatar) }}" alt="{{ config.title }}">
-            <h2>{{ config.title }}</h2>
             <ul class="meta-list">
               <li>{{ config.extra.author_title }}</li>
             </ul>
@@ -43,9 +42,15 @@
             <ul class="link-list">
               {% for item in config.extra.menu %}
                 {% if item.path == "" %}
-                  <li><a href="{{ config.base_url }}/">{{ item.name }}</a></li>
+                  <li><a href="{{ config.base_url }}/">
+                    {% include "nav_icon.html" %}
+                    <span>{{ item.name }}</span>
+                  </a></li>
                 {% else %}
-                  <li><a href="{{ get_url(path=item.path) }}">{{ item.name }}</a></li>
+                  <li><a href="{{ get_url(path=item.path) }}">
+                    {% include "nav_icon.html" %}
+                    <span>{{ item.name }}</span>
+                  </a></li>
                 {% endif %}
               {% endfor %}
             </ul>

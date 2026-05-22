@@ -10,7 +10,7 @@
   --shadow: 0 20px 50px rgba(32, 51, 72, 0.08);
   --radius: 22px;
   --shell-width: 1680px;
-  --side-width: clamp(280px, 18vw, 340px);
+  --side-width: clamp(224px, 14vw, 240px);
   --page-gutter: clamp(10px, 1.25vw, 24px);
 }
 
@@ -192,7 +192,7 @@ blockquote {
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 14px;
+  gap: 8px;
   flex-shrink: 0;
   color: var(--text);
 }
@@ -204,8 +204,8 @@ blockquote {
 
 .brand strong {
   display: block;
-  font-size: 1.05rem;
-  line-height: 1;
+  font-size: 1rem;
+  line-height: 42px;
   white-space: nowrap;
 }
 
@@ -216,8 +216,31 @@ blockquote {
 }
 
 .nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   color: var(--muted);
   font-weight: 600;
+}
+
+.nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: currentColor;
+  flex: 0 0 auto;
+}
+
+.nav-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .layout {
@@ -352,9 +375,10 @@ blockquote {
 }
 
 .avatar {
+  display: block;
   width: 74px;
   height: 74px;
-  margin: 0 0 16px;
+  margin: 0 auto 16px;
   border-radius: 50%;
   object-fit: cover;
 }
@@ -374,6 +398,7 @@ blockquote {
 .meta-list li {
   color: var(--text);
   font-size: 0.95rem;
+  white-space: nowrap;
 }
 
 .profile-card .meta-list {
@@ -383,6 +408,14 @@ blockquote {
 .link-list li + li {
   padding-top: 8px;
   border-top: 1px solid rgba(117, 138, 160, 0.14);
+}
+
+.link-list a {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  line-height: 1.4;
 }
 
 .icon-links {

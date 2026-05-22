@@ -15,7 +15,7 @@ taxonomies = [
 ]
 
 [markdown]
-render_emoji = false
+render_emoji = true
 
 [markdown.highlighting]
 theme = "github-light"
@@ -25,9 +25,7 @@ internal_level = "error"
 external_level = "warn"
 
 [extra]
-subtitle = "Just do it with AI!"
 author_title = "Android & Linux Developer"
-location = "Shenzhen, China"
 github = "https://github.com/kgbook"
 avatar = "images/avatar.png"
 logo = "images/logo-coolshin.svg"
