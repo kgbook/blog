@@ -3,10 +3,10 @@
 {% block title %}{{ config.title }}{% endblock title %}
 
 {% block content %}
-  <meta http-equiv="refresh" content="0; url={{ get_url(path='blog/') }}">
+  <meta http-equiv="refresh" content="0; url={{ get_url(path='articles/') }}">
   <section class="card page-header">
     <p class="eyebrow">Blog</p>
     <h1>文章</h1>
-    <p><a href="{{ get_url(path='blog/') }}">进入文章列表</a></p>
+    <p><a href="{{ get_url(path='articles/') }}">进入文章列表</a></p>
   </section>
 {% endblock content %}

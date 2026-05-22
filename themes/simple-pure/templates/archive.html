@@ -3,14 +3,14 @@
 {% block title %}{{ page.title }} | {{ config.title }}{% endblock title %}
 
 {% block content %}
-  {% set blog = get_section(path="blog/_index.md") %}
+  {% set articles = get_section(path="articles/_index.md") %}
   <section class="card page-header">
     <p class="eyebrow">Archive</p>
     <h1>{{ page.title }}</h1>
   </section>
 
   <section class="card archive-list">
-    {% for post in blog.pages %}
+    {% for post in articles.pages %}
       <article class="archive-item">
         <time>{{ post.date | date(format="%Y-%m-%d") }}</time>
         <a href="{{ post.permalink }}">{{ post.title }}</a>
