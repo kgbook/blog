@@ -415,7 +415,12 @@ blockquote {
   align-items: center;
   gap: 10px;
   width: 100%;
+  color: var(--muted);
   line-height: 1.4;
+}
+
+.link-list a:hover {
+  color: var(--text);
 }
 
 .icon-links {
