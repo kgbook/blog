@@ -8,6 +8,7 @@
   <link rel="icon" href="{{ get_url(path=config.extra.logo) }}">
   <link rel="alternate" type="application/atom+xml" title="{{ config.title }}" href="{{ get_url(path='atom.xml') }}">
   <link rel="stylesheet" href="{{ get_url(path='css/style.css') }}">
+  {% block head_extra %}{% endblock head_extra %}
 </head>
 <body>
   <div class="site-shell">

@@ -26,6 +26,15 @@
 
 {% block title %}{{ page.title }} | {{ config.title }}{% endblock title %}
 {% block description %}{{ page.description | default(value=config.description) }}{% endblock description %}
+{% block head_extra %}
+  {% if config.extra.comments and config.extra.comments.provider == "giscus" %}
+    <link rel="preconnect" href="https://giscus.app" crossorigin>
+    <link rel="dns-prefetch" href="//giscus.app">
+    <link rel="dns-prefetch" href="//github.com">
+    <link rel="dns-prefetch" href="//api.github.com">
+    <link rel="preload" href="https://giscus.app/client.js" as="script" crossorigin="anonymous">
+  {% endif %}
+{% endblock head_extra %}
 {% block layout_class %} layout--article{% endblock layout_class %}
 {% block sidebar %}{% endblock sidebar %}
 
