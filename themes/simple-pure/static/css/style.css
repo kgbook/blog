@@ -193,6 +193,7 @@ blockquote {
   display: inline-flex;
   align-items: center;
   gap: 14px;
+  flex-shrink: 0;
   color: var(--text);
 }
 
@@ -204,11 +205,8 @@ blockquote {
 .brand strong {
   display: block;
   font-size: 1.05rem;
-}
-
-.brand small {
-  display: block;
-  color: var(--muted);
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .nav {

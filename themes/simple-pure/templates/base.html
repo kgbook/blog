@@ -14,10 +14,7 @@
     <header class="site-header">
       <a class="brand" href="{{ config.base_url }}/">
         <img src="{{ get_url(path=config.extra.logo) }}" alt="{{ config.title }}">
-        <span>
-          <strong>{{ config.title }}</strong>
-          <small>{{ config.extra.subtitle }}</small>
-        </span>
+        <strong>{{ config.title }}</strong>
       </a>
       <nav class="nav">
         {% for item in config.extra.menu %}

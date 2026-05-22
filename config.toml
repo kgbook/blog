@@ -26,7 +26,7 @@ external_level = "warn"
 
 [extra]
 subtitle = "Just do it with AI!"
-author_title = "Android & IoT Developer"
+author_title = "Android & Linux Developer"
 location = "Shenzhen, China"
 github = "https://github.com/kgbook"
 avatar = "images/avatar.png"
