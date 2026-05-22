@@ -32,7 +32,7 @@ github = "https://github.com/kgbook"
 avatar = "images/avatar.png"
 logo = "images/logo-coolshin.svg"
 menu = [
-  { name = "首页", path = "" },
+  { name = "首页", path = "blog/" },
   { name = "归档", path = "archives" },
   { name = "分类", path = "categories" },
   { name = "标签", path = "tags" },
