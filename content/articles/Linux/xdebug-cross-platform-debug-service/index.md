@@ -34,6 +34,57 @@ tags = ["C/C++", "Linux", "Android", "RTOS", "网络调试", "nc", "telnet"]
 3. 服务端监听不能写死 `127.0.0.1`，多网口设备上要能从以太网、Wi-Fi、loopback 等不同入口访问。
 4. 代码要能裁剪，方便迁移到 Linux、Android 或 RTOS。
 
+## 整体架构
+
+先看整体结构。`xdebug_demo` 只是示例应用，真正可以复用的是 `xdebug` 库。业务模块通过 `DebugModule` 接口挂到 `DebugServer` 上，客户端通过 TCP 发送文本命令，服务端解析后分发给对应模块。
+
+```plantuml
+@startuml
+title xdebug Architecture
+
+actor "nc client" as Nc
+
+package "demo app" {
+  component "xdebug_demo" as Demo
+  component "PlayerModule" as Player
+  component "EncoderModule" as Encoder
+}
+
+package "xdebug" {
+  component "DebugServer" as Server
+  component "TCP Event Loop" as Loop
+  component "CommandParser" as Parser
+  component "Command Registry" as Registry
+  interface "DebugModule" as Module
+}
+
+Nc --> Loop : TCP text lines
+Demo --> Server : start/register modules
+Player --> Server : register in ctor\nunregister in dtor
+Encoder --> Server : register in ctor\nunregister in dtor
+note right of "demo app"
+  ctor = constructor
+  dtor = destructor
+end note
+Server --> Loop : owns worker thread
+Loop --> Parser : parse line
+Parser --> Loop : tokens / parse error
+Loop --> Registry : dispatch command
+Registry --> Module : module command
+Player ..|> Module
+Encoder ..|> Module
+Registry --> Loop : response text
+Loop --> Nc : response
+
+@enduml
+```
+
+这张图里有两个边界很重要。
+
+第一，网络入口和命令解析属于 `xdebug`。业务模块不需要关心 `accept()`、`poll()`、粘包拆行、客户端断开这些细节。
+
+第二，模块对象属于应用。`DebugServer` 只保存非持有指针，不决定业务对象什么时候销毁。这样可以避免调试系统反过来影响业务模块的生命周期。
+
 ## 为什么是 TCP 文本协议
 
 很多调试系统一开始容易走向 HTTP、WebSocket、gRPC 或自定义二进制协议。它们都能工作，但在嵌入式和跨平台场景里会放大部署成本。
@@ -93,11 +144,35 @@ telnet 10.48.11.15 59695
 
 但 telnet 有一个关键差异：telnet 不完全等同于原始 TCP 客户端。部分 telnet 实现会在连接开始时发送 option negotiation 字节。如果服务端协议没有处理这些协商字节，第一条输入可能看起来像带了乱码。
 
-所以我的建议是：
+可以按场景这样选：
+
+| 场景 | 推荐工具 | 原因 |
+| --- | --- | --- |
+| 本机或 PC 自动化脚本 | `nc` | 原始 TCP，输入输出稳定，适合重定向和管道 |
+| CI 或冒烟测试 | `nc` | 可以直接 `printf "server status\n" \| nc host port` |
+| 现场人工排查 | `nc` 优先，`telnet` 备选 | `nc` 更干净，`telnet` 覆盖老系统 |
+| 设备只内置 telnet | `telnet` | 可用于手动输入命令，但要注意协商字节 |
+| 需要验证纯协议行为 | `nc` | 不引入 telnet option negotiation |
+
+所以实践建议是：
 
 - 自动化和协议验证优先用 `nc`。
 - 手工现场排查可以用 `telnet`。
 - 如果 telnet 下命令异常，先换 `nc` 判断是不是 telnet 协商字节影响。
+
+例如自动化探测服务状态可以这样写：
+
+```bash
+printf "server status\nquit\n" | nc 192.168.1.104 59695
+```
+
+而 telnet 更像一个人工控制台：
+
+```bash
+telnet 192.168.1.104 59695
+```
+
+连上后逐行输入 `help`、`modules`、`encoder show` 这类命令即可。
 
 ## 多网口监听：为什么不能写死 127.0.0.1
 
@@ -188,6 +263,63 @@ public:
 - 模块销毁时自动从调试入口摘除。
 - 服务端不通过 shared_ptr 延长业务对象生命周期。
 
+核心类关系可以画成这样：
+
+```plantuml
+@startuml
+title xdebug Core UML
+
+class DebugServer {
+  +instance(): DebugServer&
+  +start(host: string, port: uint16): bool
+  +stop(): void
+  +isRunning(): bool
+  +registerCommand(name, handler, help): bool
+  +registerModule(module: DebugModule*): bool
+  +unregisterModule(name): bool
+  +unregisterModule(module: DebugModule*): bool
+}
+
+interface DebugModule {
+  +name(): string
+  +help(): string
+  +handle(request: CommandRequest): CommandResult
+}
+
+class CommandRequest {
+  +line: string
+  +tokens: vector<string>
+  +context: CommandContext
+}
+
+class CommandResult {
+  +status: CommandStatus
+  +output: string
+  +ok(text): CommandResult
+  +error(text): CommandResult
+  +close(text): CommandResult
+}
+
+class CommandContext {
+  +peerAddress: string
+  +peerPort: uint16
+}
+
+class PlayerModule
+class EncoderModule
+
+DebugServer o-- "non-owning *" DebugModule
+DebugModule <|.. PlayerModule
+DebugModule <|.. EncoderModule
+DebugModule ..> CommandRequest
+DebugModule ..> CommandResult
+CommandRequest o-- CommandContext
+
+@enduml
+```
+
+这里故意让 `DebugServer` 只拿 `DebugModule*`，而不是 `shared_ptr<DebugModule>`。调试服务只是索引入口，不应该用引用计数改变业务模块的销毁时机。模块负责人最清楚对象什么时候有效，也最适合在构造和析构里维护注册状态。
+
 ## 命令分发模型
 
 命令协议是一行一条：
@@ -221,6 +353,35 @@ quit
 
 内置命令保留给服务本身；业务命令按模块命名空间隔离，减少冲突。
 
+一次 `encoder show` 的完整链路如下：
+
+```plantuml
+@startuml
+title xdebug Command Sequence
+
+actor User
+participant "nc / telnet" as Client
+participant "DebugServer\nTCP Event Loop" as Server
+participant "CommandParser" as Parser
+participant "Command Registry" as Registry
+participant "EncoderModule" as Module
+
+User -> Client : type "encoder show"
+Client -> Server : TCP line
+Server -> Parser : parseCommandLine(line)
+Parser --> Server : tokens = ["encoder", "show"]
+Server -> Registry : dispatch(tokens)
+Registry -> Module : handle(["show"])
+Module --> Registry : CommandResult("encoder fps=60")
+Registry --> Server : response
+Server --> Client : response text
+Client --> User : print response
+
+@enduml
+```
+
+这里的关键点是：TCP 层只负责收发文本行，Parser 只负责把一行拆成 token，Registry 只负责找到目标命令或模块，业务模块只处理自己的子命令。每层职责都比较窄，后续迁移到不同平台时也更容易替换。
+
 ## 跨平台考虑
 
 当前实现面向 POSIX socket，Linux 和 Android Native 可以直接适配。RTOS 场景需要看网络栈能力，常见迁移点包括：
@@ -232,6 +393,20 @@ quit
 - 动态内存策略按项目要求收敛。
 
 也就是说，`xdebug` 的分层应该保持清楚：命令解析、注册表、模块接口是平台无关部分；socket event loop 是平台相关部分。
+
+可以把跨平台适配分成三层：
+
+| 层级 | 内容 | 迁移难度 |
+| --- | --- | --- |
+| 模块接口层 | `DebugModule`、`CommandRequest`、`CommandResult` | 低，基本平台无关 |
+| 命令层 | token 解析、注册表、内置命令 | 低，只依赖 C++ 标准库 |
+| 网络事件层 | socket、监听、客户端读写、唤醒退出 | 中，需要按 OS/RTOS 网络栈适配 |
+
+在 Linux 上，`poll()` 和 pipe 唤醒是很自然的组合。`stop()` 时向 wake pipe 写入 1 字节字符 `1`，让 `poll()` 返回，然后事件循环可以退出并清理 fd。
+
+在 Android Native 上，模型基本一致，只是要考虑 SELinux、应用沙箱、端口暴露方式和 `adb forward`。
+
+在 RTOS 上，如果没有 `poll()`，可以把网络线程改成阻塞 `accept()` 加客户端任务，或者用系统提供的 select/event group。只要保留"一行命令 -> token -> 模块处理 -> 文本响应"这个核心协议，客户端侧体验不需要变化。
 
 在 Android 上，常见使用方式是 native service 或 JNI 底层库启动调试入口，然后通过：
 
@@ -245,6 +420,10 @@ nc 127.0.0.1 59695
 ```bash
 adb forward tcp:59695 tcp:59695
 nc 127.0.0.1 59695
+```
+或
+```bash
+nc <设备IP> 59695
 ```
 
 在 Linux 设备上，可以直接从 PC 连设备 IP：
@@ -268,6 +447,10 @@ nc 192.168.1.104 59695
 - 高风险命令需要二次确认或只在本地构建启用。
 
 `0.0.0.0` 解决的是多网口可达性，不等于安全策略。真正上线时要结合防火墙、认证、编译开关一起考虑。
+
+## 代码下载
+
+[xdebug](https://github.com/kgbook/xdebug)
 
 ## 小结
 
