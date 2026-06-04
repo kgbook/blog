@@ -3,10 +3,21 @@
 {% block title %}{{ config.title }}{% endblock title %}
 
 {% block content %}
-  <meta http-equiv="refresh" content="0; url={{ get_url(path='articles/') }}">
+  {% set articles = get_section(path="articles/_index.md") %}
+
   <section class="card page-header">
     <p class="eyebrow">Blog</p>
-    <h1>文章</h1>
-    <p><a href="{{ get_url(path='articles/') }}">进入文章列表</a></p>
+    <h1>{{ articles.title }}</h1>
+    {% if articles.content %}
+      <div class="page-intro">{{ articles.content | safe }}</div>
+    {% endif %}
   </section>
+
+  {% for page in articles.pages %}
+    <article class="card post-card">
+      <p class="post-meta">{{ page.date | date(format="%Y-%m-%d") }}</p>
+      <h2><a href="{{ page.permalink }}">{{ page.title }}</a></h2>
+      <p>{{ page.content | striptags | replace(from="[TOC]", to="") | truncate(length=220) }}</p>
+    </article>
+  {% endfor %}
 {% endblock content %}
