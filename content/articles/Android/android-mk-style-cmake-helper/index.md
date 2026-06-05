@@ -11,14 +11,14 @@ tags = ["CMake", "C++", "跨平台构建", "Android.mk"]
 
 CMake 很强，但刚开始接触时也很容易写乱。
 
-比如我们想做一件很普通的事：写一个 `hello` object library，再写一个 `hello_world` 可执行程序去使用它。原生 CMake 可能会这样写：
+比如我们想做一件很普通的事：写一个 `hello` object library，再写一个 `basic_hello_world` 可执行程序去使用它。原生 CMake 可能会这样写：
 
 ```cmake
 add_library(hello OBJECT hello/src/hello.cpp)
 target_include_directories(hello PUBLIC hello/include)
 
-add_executable(hello_world example/src/main.cpp)
-target_link_libraries(hello_world PRIVATE hello)
+add_executable(basic_hello_world example/basic_hello/src/main.cpp)
+target_link_libraries(basic_hello_world PRIVATE hello)
 ```
 
 这段代码不难，但项目一大，问题就来了：
@@ -78,7 +78,7 @@ include(${BUILD_OBJECT_LIBRARY})
 
 ```cmake
 include(${CLEAR_VARS})
-set(LOCAL_MODULE hello_world)
+set(LOCAL_MODULE basic_hello_world)
 set(LOCAL_SRC_FILES
     src/main.cpp)
 set(LOCAL_OBJECT_LIBRARIES
@@ -88,7 +88,7 @@ include(${BUILD_EXECUTABLE})
 
 它的意思也很直接：
 
-“当前模块叫 `hello_world`。源码是 `src/main.cpp`。它使用 object library `hello`。最后把它构建成可执行程序。”
+“当前模块叫 `basic_hello_world`。源码是 `src/main.cpp`。它使用 object library `hello`。最后把它构建成可执行程序。”
 
 这就是这种写法的核心价值：不要求读者先理解很多 CMake 细节，也能先看懂模块结构。
 
@@ -179,7 +179,7 @@ set(LOCAL_EXPORT_C_INCLUDES
 
 这是当前模块对外暴露的头文件目录。
 
-比如 `hello` 库提供了 `include/hello/hello.hpp`，那么 `hello_world` 链接 `hello` 后，也应该能包含这个头文件。这种目录就放到 `LOCAL_EXPORT_C_INCLUDES`。
+比如 `hello` 库提供了 `include/hello/hello.hpp`，那么 `basic_hello_world` 链接 `hello` 后，也应该能包含这个头文件。这种目录就放到 `LOCAL_EXPORT_C_INCLUDES`。
 
 可以把它理解成“公开 include”。
 
@@ -229,6 +229,94 @@ include(${BUILD_PREBUILT})
 
 前面的 `LOCAL_*` 是填表，最后的 `BUILD_*` 是提交表单。
 
+### `ALL_SUBDIR_CMAKELISTS`
+
+前面这些 `BUILD_*` 负责创建一个具体 target。还有一种常见需求是：一个目录下面有很多子模块，每个子模块都有自己的 `CMakeLists.txt`，父目录不想手动一行行写：
+
+```cmake
+add_subdirectory(module_a)
+add_subdirectory(module_b)
+add_subdirectory(module_c)
+```
+
+这时可以用：
+
+```cmake
+include(${ALL_SUBDIR_CMAKELISTS})
+```
+
+它会扫描当前 `CMakeLists.txt` 所在目录的直接子目录，只要子目录里有 `CMakeLists.txt`，就自动 `add_subdirectory` 进去。
+
+这个接口适合扁平的模块目录，例如：
+
+```text
+example/
+├── CMakeLists.txt
+├── basic_hello/
+│   └── CMakeLists.txt
+└── auto_lists/
+    └── CMakeLists.txt
+```
+
+`example/CMakeLists.txt` 就可以只写：
+
+```cmake
+include(${ALL_SUBDIR_CMAKELISTS})
+```
+
+这样新增一个同级 example 时，只要给它建好自己的 `CMakeLists.txt`，父目录不用再改。
+
+### `ALL_CMAKELISTS_UNDER`
+
+`ALL_SUBDIR_CMAKELISTS` 只看直接子目录，不递归。它适合“当前目录下面每个子目录都是一个模块”的场景。
+
+如果模块树更深，例如 feature 下面还分 core、ui、platform 等多层目录，就可以用：
+
+```cmake
+set(LOCAL_PATH ${CMAKE_CURRENT_LIST_DIR}/modules)
+include(${ALL_CMAKELISTS_UNDER})
+unset(LOCAL_PATH)
+```
+
+它会从 `LOCAL_PATH` 指定的根目录开始，递归查找下面所有 `CMakeLists.txt`，再逐个加入构建。
+
+例如：
+
+```text
+example/auto_lists/recursive/
+├── CMakeLists.txt
+└── modules/
+    ├── core/
+    │   └── CMakeLists.txt
+    └── features/
+        └── phrase/
+            └── CMakeLists.txt
+```
+
+`recursive/CMakeLists.txt` 可以先把 `modules/` 下所有 target 加进来，然后再声明自己的可执行程序：
+
+```cmake
+set(LOCAL_PATH ${CMAKE_CURRENT_LIST_DIR}/modules)
+include(${ALL_CMAKELISTS_UNDER})
+unset(LOCAL_PATH)
+
+include(${CLEAR_VARS})
+set(LOCAL_MODULE auto_lists_demo)
+set(LOCAL_SRC_FILES
+    src/main.cpp)
+set(LOCAL_STATIC_LIBRARIES
+    auto_lists_direct
+    auto_lists_phrase)
+include(${BUILD_EXECUTABLE})
+```
+
+简单区分一下：
+
+- `ALL_SUBDIR_CMAKELISTS`：只扫一层，适合 example、modules、plugins 这类扁平集合目录。
+- `ALL_CMAKELISTS_UNDER`：递归扫描，适合更深的 feature tree 或分层模块树。
+
+这两个接口不是用来把所有 `.cpp` 收集成一个大 target 的。它们内部仍然是 `add_subdirectory`，所以每个子目录保留自己的 CMake 作用域和 target 声明。也就是说，它们解决的是“自动加入子模块”的问题，而不是“自动收集源码”的问题。
+
 ## 四、一个完整 hello world
 
 目录结构如下：
@@ -244,8 +332,10 @@ hello/
 
 example/
 ├── CMakeLists.txt
-└── src/
-    └── main.cpp
+└── basic_hello/
+    ├── CMakeLists.txt
+    └── src/
+        └── main.cpp
 ```
 
 `hello.hpp`：
@@ -254,11 +344,10 @@ example/
 #pragma once
 
 #include <string>
-#include <string_view>
 
 namespace hello {
 
-std::string message(std::string_view name);
+std::string message(const std::string& name);
 
 }
 ```
@@ -270,9 +359,9 @@ std::string message(std::string_view name);
 
 namespace hello {
 
-std::string message(std::string_view name)
+std::string message(const std::string& name)
 {
-    return "Hello, " + std::string(name) + "!";
+    return "Hello, " + name + "!";
 }
 
 }
@@ -284,17 +373,13 @@ std::string message(std::string_view name)
 #include "hello/hello.hpp"
 
 #include <iostream>
-#include <string_view>
+#include <string>
 
 namespace {
 
-constexpr std::string_view default_name()
+std::string default_name()
 {
-    if constexpr (sizeof(void*) >= 8) {
-        return "world";
-    } else {
-        return "embedded world";
-    }
+    return "world";
 }
 
 }
@@ -324,11 +409,17 @@ set(LOCAL_INTERFACE_LIBRARIES
 include(${BUILD_OBJECT_LIBRARY})
 ```
 
-`example/CMakeLists.txt`：
+`example/CMakeLists.txt` 用来自动加入 example 子目录：
+
+```cmake
+include(${ALL_SUBDIR_CMAKELISTS})
+```
+
+`example/basic_hello/CMakeLists.txt`：
 
 ```cmake
 include(${CLEAR_VARS})
-set(LOCAL_MODULE hello_world)
+set(LOCAL_MODULE basic_hello_world)
 set(LOCAL_SRC_FILES
     src/main.cpp)
 set(LOCAL_OBJECT_LIBRARIES
@@ -345,7 +436,7 @@ project(CMakeHelper
     VERSION 0.1.0
     LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -365,16 +456,18 @@ endif()
 ```sh
 cmake -S . -B build
 cmake --build build
-./build/example/hello_world
+./build/example/basic_hello/basic_hello_world
+./build/example/auto_lists/recursive/auto_lists_demo
 ```
 
 输出：
 
 ```text
 Hello, world!
+direct child + recursive child via ALL_CMAKELISTS_UNDER
 ```
 
-这里的 C++17 是在顶层 `CMakeLists.txt` 配置的。`cmake/` helper 模块本身不强制 C++ 标准，这样同一套模块也可以服务 C++11、C++14、C++17 或更高标准的项目。
+这里的 C++11 是在顶层 `CMakeLists.txt` 配置的。`cmake/` helper 模块本身不强制 C++ 标准，这样同一套模块也可以服务 C++11、C++14、C++17 或更高标准的项目。
 
 ## 五、为什么它不绑定单一平台
 
