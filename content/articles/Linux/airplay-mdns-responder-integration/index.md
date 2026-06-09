@@ -199,12 +199,78 @@ std::string format_ipv4_address(std::uint32_t address) {
 
 与已有的 `parse_ipv4_address`（字符串 → uint32_t）互为逆操作。
 
+## 第四个问题：IPv6 应该优先于 IPv4
+
+功能验证通过后，回看之前写的一篇博客[《AirPlay mDNS 双栈发现：A 和 AAAA 到底该怎么发》](/2026/06/08/airplay-mdns-ipv4-ipv6-rfc/)，发现当前实现有一个更根本的问题：**IPv4 是一等公民，IPv6 是二等公民**。
+
+### 博客的结论
+
+那篇博客基于 [UxPlay PR #523](https://github.com/FDH2/UxPlay/pull/523) 的讨论，得出的结论是：
+
+> 使用 Avahi 时，只看到 IPv6 连接。
+
+Avahi 主要发布 IPv6 地址，iOS/macOS 客户端也优先通过 IPv6 连接。博客推荐 logical-interface 模型的目的之一就是减少客户端发起双连接的概率。
+
+### 当前实现的三层不对称
+
+抓包数据揭示了问题：每个广播周期 IPv4 总是先发，IPv6 后发。
+
+| 顺序 | 来源 | 地址记录 |
+|------|------|----------|
+| 1 | `192.168.1.100` → `224.0.0.251` | A (type=1) |
+| 2 | `fe80::c36:...` → `ff02::fb` | AAAA (type=28) |
+
+代码层面有三个不对称：
+
+**runtime.cpp 只配置 IPv4**：显式检测 IPv4 并 fallback 到 `127.0.0.1`，IPv6 完全没提及，留给 responder 内部静默自动检测。
+
+**IPv4 有 fallback，IPv6 没有**：IPv6 检测失败时保持全零，`add_aaaa()` 静默跳过，连一行警告日志都没有。
+
+**announce() 先 IPv4 后 IPv6**：客户端先看到 IPv4 地址，自然先尝试 IPv4 连接——这正是 PR #523 描述的问题。
+
+### 解决方案
+
+三处修改：
+
+1. runtime.cpp 显式检测 IPv6 并打印日志（IPv6 先于 IPv4）
+2. IPv6 检测失败时打印警告
+3. `announce()` 中先发 IPv6 包，再发 IPv4 包
+
+```cpp
+// runtime.cpp
+std::array<std::uint8_t, 16> ipv6{};
+if (default_ipv6_address(ipv6)) {
+    config.ipv6_address = ipv6;
+    LOGI("APlayReceiver", "detected IPv6: %s", format_ipv6_address(ipv6).c_str());
+} else {
+    LOGW("APlayReceiver", "no IPv6 multicast interface found");
+}
+
+// announce() in mdns_responder.cpp
+void announce(std::uint32_t ttl) {
+    // IPv6 先发
+    send_ipv6_multicast_packets(ipv6_packets, 0);
+    // IPv4 后发
+    send_ipv4_packets(ipv4_packets, ...);
+}
+```
+
+修复后抓包验证：
+
+| 顺序 | 来源 | 地址记录 |
+|------|------|----------|
+| 1 | `fe80::c36:...` → `ff02::fb` | AAAA (type=28) |
+| 2 | `192.168.1.100` → `224.0.0.251` | A (type=1) |
+
+客户端优先看到 IPv6 地址，行为与 Avahi 一致。
+
 ## 总结
 
-这次集成改动不大，但通过抓包发现了三个不明显的 bug：
+这次集成改动不大，但通过抓包发现了四个不明显的 bug：
 
 1. **架构问题**：周期性广播不应由调用方管理，内聚到 responder 线程后主线程只需 `pause()`
 2. **生命周期问题**：Singleton 析构导致 `stop()` 重复调用，需要 `stopped_` 守卫
 3. **协议语义问题**：`model` 字段影响 iOS 的设备分类，需要通过抓包对比真实设备才能发现
+4. **双栈优先级问题**：IPv4 被当作一等公民显式配置和优先发送，IPv6 被静默自动检测且后发；结合前一篇博客的结论，应该让 IPv6 优先
 
-三个问题的共同特点是：**代码逻辑看起来都对，但运行时行为不对**。只有通过抓包对比实际网络上的报文，才能定位到真正的问题。
+四个问题的共同特点是：**代码逻辑看起来都对，但运行时行为不对**。只有通过抓包对比实际网络上的报文，才能定位到真正的问题。
