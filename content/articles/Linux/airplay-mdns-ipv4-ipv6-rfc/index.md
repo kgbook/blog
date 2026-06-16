@@ -108,6 +108,12 @@ AirPlay 常见服务包括：
 | `TXT` | AirPlay/RAOP 能力字段 |
 | `A` 或 `AAAA` | `SRV` target host 的地址 |
 
+这里要特别区分服务实例名和主机名。`_airplay._tcp.local` 的实例名应该是接收端展示名，例如 `UxPlay._airplay._tcp.local`；`_raop._tcp.local` 的实例名应该是 `<device-id>@<receiver>._raop._tcp.local`，例如 `5855CA1AE288@UxPlay._raop._tcp.local`。不要把 hostname 拼进实例名里，`UxPlay@debian._airplay._tcp.local` 或 `<mac>@UxPlay@debian._raop._tcp.local` 这类写法会把 `debian` 误放进 service instance。
+
+hostname 只应该出现在 `SRV` 的 target 里，例如 `SRV UxPlay._airplay._tcp.local -> debian.local:7000`，后续 `A` / `AAAA` 记录再负责把 `debian.local` 解析成地址。
+
+如果同一链路上已经存在相同的 AirPlay/RAOP service instance，这是 DNS-SD name conflict 问题，应该用不同的 receiver name 重新发布，而不是把 hostname 塞进 service instance。macOS 上还要注意系统 `mDNSResponder` 可能已经拥有 `host.local` 的地址记录；内置 responder 在服务响应里可以只发 `PTR` / `SRV` / `TXT`，不要把 host `A` / `AAAA` 作为 additional records 附上，直接 host 地址查询再单独回答。
+
 RFC 6763 第 12 节建议 responder 在 PTR/SRV response 的 additional records 里带上 SRV target host 的地址记录。这个规则是效率优化，不是正确性硬要求。客户端必须能在 additional records 缺失时继续查询地址。
 
 结合前面的 logical-interface 模型，AirPlay responder 的策略可以写得更精确：
