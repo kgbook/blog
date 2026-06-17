@@ -507,6 +507,14 @@ blockquote {
   word-break: break-word;
 }
 
+.markdown-body img {
+  width: auto;
+  max-width: min(100%, 960px);
+  height: auto;
+  margin: 1.25rem auto;
+  object-fit: contain;
+}
+
 .markdown-body table {
   display: block;
   width: 100%;
