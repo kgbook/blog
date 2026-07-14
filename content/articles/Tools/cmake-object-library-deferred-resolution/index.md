@@ -1,5 +1,5 @@
 +++
-title = "CMake object library 的延迟解析与对象文件传播"
+title = "CMake object library 的延迟解析与对象文件传递"
 date = 2026-07-13
 
 [taxonomies]
@@ -210,7 +210,7 @@ set(LOCAL_C_INCLUDES ../../render/vrender/include)
 
 把 `aplay_osal_log` 改为 static library，链接错误确实会消失：链接器可以从 `.a` 中按需取出符号。
 
-但那只是换了交付形式，并没有修复“helper 不知道如何处理稍后创建的 object target”这个模型缺口。项目既然选择 object library 来把平台适配代码并入最终产物，就应该把对象传播规则写正确，而不是因为一次依赖顺序问题把所有 object library 改成 static library。
+但那只是换了交付形式，并没有修复“helper 不知道如何处理稍后创建的 object target”这个模型缺口。项目既然选择 object library 来把平台适配代码并入最终产物，就应该把对象传递规则写正确，而不是因为一次依赖顺序问题把所有 object library 改成 static library。
 
 CMake 从 3.21 起对在链接上下文中使用 `$<TARGET_OBJECTS:...>` 提供了更完整的支持：对象会放在库之前，并自动建立所需的构建顺序。细节见 [官方文档的说明](https://cmake.org/cmake/help/latest/command/target_link_libraries.html#linking-object-libraries-via-target-objects)。
 
