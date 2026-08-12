@@ -3,7 +3,7 @@ title = "AirPlay mDNS 双栈发现：A 和 AAAA 到底该怎么发"
 date = 2026-06-08
 path = "2026/06/08/airplay-mdns-ipv4-ipv6-rfc"
 [taxonomies]
-categories = ["Linux"]
+categories = ["AirPlay"]
 tags = ["AirPlay", "mDNS", "DNS-SD", "IPv4", "IPv6", "RFC6762", "UxPlay", "APlay"]
 
 +++

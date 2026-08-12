@@ -3,7 +3,7 @@ title = "35 个包去了哪里：用日志和 Wireshark 追踪 AirPlay 音频丢
 date = 2026-07-19
 path = "2026/07/19/raop-udp-packet-loss-debugging"
 [taxonomies]
-categories = ["Linux"]
+categories = ["AirPlay"]
 tags = ["AirPlay", "RAOP", "RTP", "UDP", "Wireshark", "Linux", "FFmpeg", "APlay"]
 
 +++

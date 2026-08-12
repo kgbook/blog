@@ -3,7 +3,7 @@ title = "Wireshark 分析 AirPlay 投屏"
 date = 2026-06-19
 path = "2026/06/19/airplay-wireshark-rtsp-analysis"
 [taxonomies]
-categories = ["Linux"]
+categories = ["AirPlay"]
 tags = ["AirPlay", "RTSP", "Wireshark", "APlay", "FairPlay", "RTP", "plist", "mDNS"]
 
 +++

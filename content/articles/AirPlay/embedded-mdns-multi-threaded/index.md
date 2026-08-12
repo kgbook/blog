@@ -3,7 +3,7 @@ title = "APlay 为什么不把 mDNS 拆成独立进程"
 date = 2026-06-05
 path = "2026/06/05/embedded-mdns-multi-threaded"
 [taxonomies]
-categories = ["HarmonyOS"]
+categories = ["AirPlay"]
 tags = ["HarmonyOS", "RTOS", "Android", "Linux", "mDNS", "AirPlay", "架构设计", "嵌入式"]
 
 +++

@@ -1,9 +1,10 @@
 +++
 title = "AirPlay mDNS Harness：模拟 AirPlay 设备的技术实现"
 date = 2026-06-04
+path = "articles/AI/airplay-mdns-harness"
 
 [taxonomies]
-categories = ["AI"]
+categories = ["AirPlay"]
 tags = ["mDNS", "AirPlay", "Linux", "C/C++", "网络协议", "测试框架", "harness", "AI"]
 +++
 

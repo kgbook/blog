@@ -1,9 +1,10 @@
 +++
 title = "让 iPhone 通过电脑代理访问网络：测试 YouTube 投屏"
 date = 2026-07-14
+path = "articles/Tools/iphone-wifi-proxy-youtube-airplay"
 
 [taxonomies]
-categories = ["Tools"]
+categories = ["AirPlay"]
 tags = ["iPhone", "YouTube", "AirPlay", "Clash Verge", "HTTP 代理"]
 +++
 

@@ -3,7 +3,7 @@ title = "AirPlay 投屏设备发现"
 date = 2026-05-16
 path = "2026/05/16/airplay_mdns_discovery"
 [taxonomies]
-categories = ["Android"]
+categories = ["AirPlay"]
 tags = ["AirPlay", "mDNS", "DNS-SD", "Android", "网络分析"]
 
 +++

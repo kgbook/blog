@@ -3,7 +3,7 @@ title = "AirPlay 投屏设备发现稳定性：mDNS 缓存一致性问题定位�
 date = 2026-06-19
 path = "2026/06/19/airplay-mdns-cache-coherency"
 [taxonomies]
-categories = ["Linux"]
+categories = ["AirPlay"]
 tags = ["AirPlay", "mDNS", "DNS-SD", "RFC6762", "Avahi", "APlay", "Wireshark"]
 
 +++
