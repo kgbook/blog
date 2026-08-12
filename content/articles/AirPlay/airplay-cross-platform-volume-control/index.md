@@ -1,5 +1,5 @@
 +++
-title = "从满音量到曲线一致：AirPlay 音量控制的跨平台实现"
+title = "AirPlay 投屏音量控制：初始音量同步、音量曲线与跨平台实现"
 date = 2026-08-03
 path = "2026/08/03/airplay-cross-platform-volume-control"
 [taxonomies]
@@ -10,16 +10,10 @@ tags = ["AirPlay", "RAOP", "HLS", "Android", "HarmonyOS", "Desktop", "Qt", "音�
 
 ## 一个看似简单的满音量问题
 
-问题最早出现在 Android 接收端：先把设备媒体音量调低，再从手机发起
-AirPlay 投屏，发送端的音量滑块仍从最大值开始。播放本身没有失败，但两端
-像各自拿着一只互不相干的旋钮：接收端已经很小，发送端却认为是满音量；
-继续拖动滑块后，声音变化又可能叠加在系统音量之上。
+先把接收端设备媒体音量调到最低，再从Apple设备发起AirPlay 投屏，投屏收发两端音量都变成满音量了！沿着这个现象继续测试，很快又遇到几组相关但不完全相同的问题：
 
-沿着这个现象继续测试，很快又遇到几组相关但不完全相同的问题：
-
-- 发送端已经拖到最低非静音位置，Android 接收端仍处于中等音量；
-- HarmonyOS 也从满音量开始，而且发送端增益与系统媒体音量重复叠加；
-- Desktop 断开再投屏后，新的 RAOP 或 HLS 管线会把输出重新推回满音量；
+- 发送端调节音量，已经拖到最低静音位置，接收端仍处于中等音量；
+-  断开再投屏后，新的 RAOP 或 HLS 管线会把输出重新推回满音量；
 - 修好初始同步后，Bilibili、YouTube 的 HLS 投屏反而不再发送音量调节请求。
 
 这些症状横跨 RTSP、`/info`、系统音量 API、PCM 处理、OHAudio 和
@@ -37,7 +31,7 @@ AirPlay 投屏，发送端的音量滑块仍从最大值开始。播放本身没
 AirPlay/RAOP 通过 RTSP 的 `SET_PARAMETER` 下发音量，参数是 dB 衰减值：
 
 ```http
-SET_PARAMETER rtsp://receiver/session RTSP/1.0
+SET_PARAMETER rtsp://fe80::76b6:480f:e638:57cb/15045326354330175316 RTSP/1.0
 Content-Type: text/parameters
 
 volume: -11.123877
@@ -103,9 +97,10 @@ Android 和 HarmonyOS 提供的是离散系统音量索引，例如 `0..150` 或
 只是让 AirPlay 滑块位置与系统滑块位置一致：
 
 ```text
-AirPlay -30 dB  <-> 系统最小音量
-AirPlay   0 dB  <-> 系统最大音量
-AirPlay -144 dB  -> 系统最小音量（静音端）
+  0 dB      最大音量，不衰减
+ -1~-29 dB  正常衰减
+-30 dB      最小的“非静音”音量
+-144 dB     特殊值：明确静音
 ```
 
 因此双向映射应在位置域线性完成。假设归一化档位为 `level=0..100`：
@@ -394,20 +389,7 @@ Android 生成两个 ABI 的 APK/AAR，HarmonyOS 生成 HAP。Android 真机进�
 截至这笔提交整理时，这一轮回归修复后的完整真机矩阵仍需要用新日志和抓包
 闭环，因此不能把三平台包装构建通过写成“投屏问题已经实机验收”。
 
----
-
-## 回看这条提交链
-
-这次音量问题不是一笔提交解决的，而是逐步把错误模型拆开的过程：
-
-| 提交 | 解决的问题 |
-| --- | --- |
-| `9f63963` | 新增共享 101 项 LUT、PCM gain 处理及 Android/Harmony/Desktop 渲染接入 |
-| `2d82c36` | Android 系统媒体音量、`initialVolume` 与 RTSP 双向同步 |
-| `1539ab4` | 把 AirPlay `-30..0 dB` 与系统音量位置改为线性映射 |
-| `6539dce` | 通过 AudioKit 与 NAPI 补齐 HarmonyOS 系统音量桥 |
-| `bd3307a` | Desktop 分离持久输出音量和管线 gain，修复重建复位 |
-| `b051781` | 移除错误 `volumeControlType=4`，恢复 HLS 的 RTSP 音量更新 |
+## 
 
 如果只看最终代码，会觉得 reader、writer 和几个 gain 字段并不复杂。真正困难
 的是确定每一层“音量”究竟代表控制器位置、协议衰减、系统媒体音量，还是
